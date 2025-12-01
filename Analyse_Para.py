@@ -830,6 +830,7 @@ Nombre de vitrage non-conforme: {nb_non_conforme}
     buffer.seek(0)
     return buffer
 
+
 def Ajout_Titre(input_pdf, watermark_url, transparency, scale, pos_y, pos_x):
     reader = PdfReader(input_pdf)
     writer = PdfWriter()
@@ -838,6 +839,9 @@ def Ajout_Titre(input_pdf, watermark_url, transparency, scale, pos_y, pos_x):
     response = requests.get(watermark_url)
     img_data = io.BytesIO(response.content)
     img = ImageReader(img_data)
+
+    # Dimensions originales de l'image
+    orig_width, orig_height = img.getSize()
 
     for i, page in enumerate(reader.pages):
         # Ne pas appliquer sur la première page
@@ -856,10 +860,11 @@ def Ajout_Titre(input_pdf, watermark_url, transparency, scale, pos_y, pos_x):
 
         c.setFillAlpha(transparency)
 
-        # Taille proportionnelle
-        img_width = scale * largeur
-        img_height = scale * hauteur
+        # Conserver proportions : multiplier largeur et hauteur originales par le facteur scale
+        img_width = orig_width * scale
+        img_height = orig_height * scale
 
+        # Centrer l'image autour de (x, y)
         c.drawImage(img, x - img_width/2, y - img_height/2,
                     width=img_width, height=img_height, mask='auto')
 
@@ -1086,6 +1091,7 @@ else:
     st.info("📥 Importez un fichier Excel pour commencer l’analyse.")
         # Footer
 st.caption("Application développée avec Streamlit et Shapely")
+
 
 
 
