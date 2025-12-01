@@ -766,7 +766,7 @@ def generer_rapport_pdf(df, graphs):
         url_logo = 'https://github.com/lilianmtech/Analyse_Parallelogramme_Vitrage/blob/main/logo-couleur.png?raw=true'
         response = requests.get(url_logo)
         img = ImageReader(io.BytesIO(response.content))
-        orig_width, orig_height = img.getSize()
+        orig_height, orig_width = img.shape[:2]
         scale = 0.5
         img_width = orig_width * scale
         img_height = orig_height * scale
@@ -1095,6 +1095,7 @@ else:
     st.info("📥 Importez un fichier Excel pour commencer l’analyse.")
         # Footer
 st.caption("Application développée avec Streamlit et Shapely")
+
 
 
 
