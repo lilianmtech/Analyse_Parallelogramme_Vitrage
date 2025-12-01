@@ -3,4 +3,5 @@ reportlab
 shapely
 Vitrage_2
 sympy
-scipy.optimize
+scipy
+
