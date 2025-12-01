@@ -785,7 +785,7 @@ def generer_rapport_pdf(df, graphs):
     
         # Position en fractions (centrage autour de 0.5, 0.5 par exemple)
         left = 0.45
-        bottom = 0.40
+        bottom = 0.45
     
         ax = fig_titre.add_axes([left, bottom, img_width_frac, img_height_frac])
         ax.imshow(img)
@@ -1107,6 +1107,7 @@ else:
     st.info("📥 Importez un fichier Excel pour commencer l’analyse.")
         # Footer
 st.caption("Application développée avec Streamlit et Shapely")
+
 
 
 
