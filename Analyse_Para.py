@@ -12,6 +12,7 @@ from shapely import *
 from scipy.optimize import minimize_scalar
 import builtins
 import io
+import requests
 
 class Vitrage:
     def __init__(self,cadre_0,cadre_def,Gamme,raico,pf,calage_lateral='Sans'):
@@ -1045,6 +1046,7 @@ else:
     st.info("📥 Importez un fichier Excel pour commencer l’analyse.")
         # Footer
 st.caption("Application développée avec Streamlit et Shapely")
+
 
 
 
