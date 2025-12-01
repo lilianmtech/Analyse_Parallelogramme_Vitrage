@@ -419,7 +419,7 @@ def Dechaussement_vitrage(uploaded_file, option_calage, Raico):
     Coord,Depl = CoordPoint(uploaded_file,Feuille_coord)
     
     document =xl.load_workbook(uploaded_file,data_only=True)
-    sheet = document['Vitrages']
+    sheet = document['Cadres']
     max_row = sheet.max_row
     datas = {
         'ID vitrage': [],
@@ -1046,6 +1046,7 @@ else:
     st.info("📥 Importez un fichier Excel pour commencer l’analyse.")
         # Footer
 st.caption("Application développée avec Streamlit et Shapely")
+
 
 
 
