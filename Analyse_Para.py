@@ -13,6 +13,9 @@ from scipy.optimize import minimize_scalar
 import builtins
 import io
 import requests
+from PyPDF2 import PdfReader, PdfWriter
+from reportlab.pdfgen import canvas
+from reportlab.lib.utils import ImageReader
 
 class Vitrage:
     def __init__(self,cadre_0,cadre_def,Gamme,raico,pf,calage_lateral='Sans'):
@@ -827,14 +830,50 @@ Nombre de vitrage non-conforme: {nb_non_conforme}
     buffer.seek(0)
     return buffer
 
-def formater_metric(label, valeur):
-    if valeur > 0:
-        delta = '🟢 OK'
-    elif valeur < 0:
-        delta = '🔴 NOK'
-    else:
-        delta = '🟠 Calé latéralement'
-    st.metric(label=label, value=valeur, delta=delta)
+def Ajout_Titre(input_pdf, watermark_url, transparency, scale, pos_y, pos_x):
+    reader = PdfReader(input_pdf)
+    writer = PdfWriter()
+
+    # Télécharger l'image depuis GitHub (raw URL)
+    response = requests.get(watermark_url)
+    img_data = io.BytesIO(response.content)
+    img = ImageReader(img_data)
+
+    for i, page in enumerate(reader.pages):
+        # Ne pas appliquer sur la première page
+        if i == 0:
+            writer.add_page(page)
+            continue
+
+        largeur = float(page.mediabox.width)
+        hauteur = float(page.mediabox.height)
+
+        packet = io.BytesIO()
+        c = canvas.Canvas(packet, pagesize=(largeur, hauteur))
+
+        x = pos_x * largeur
+        y = pos_y * hauteur
+
+        c.setFillAlpha(transparency)
+
+        # Taille proportionnelle
+        img_width = scale * largeur
+        img_height = scale * hauteur
+
+        c.drawImage(img, x - img_width/2, y - img_height/2,
+                    width=img_width, height=img_height, mask='auto')
+
+        c.save()
+
+        packet.seek(0)
+        watermark = PdfReader(packet)
+        page.merge_page(watermark.pages[0])
+        writer.add_page(page)
+
+    output = io.BytesIO()
+    writer.write(output)
+    output.seek(0)
+    return output
 
 def colorer_valeurs(val):
     if val > 0:
@@ -1023,7 +1062,8 @@ if uploaded_file:
         if st.button("🔄 Générer le Rapport PDF", use_container_width=True, type="primary"):
             with st.spinner("Génération du rapport PDF en cours..."):
                 try:
-                    pdf_buffer = generer_rapport_pdf(df_affichage, graphs)
+                    pdf = generer_rapport_pdf(df_affichage, graphs)
+                    pdf_buffer=Ajout_Titre(pdf, 'https://github.com/lilianmtech/Analyse_Parallelogramme_Vitrage/blob/main/logo-couleur.png?raw=true', 0.3, 0.50, 0.8, 0.8):
                     st.session_state['pdf_buffer'] = pdf_buffer
                     st.session_state['pdf_generated'] = True
                     st.success("✅ Rapport PDF généré avec succès !")
@@ -1046,6 +1086,7 @@ else:
     st.info("📥 Importez un fichier Excel pour commencer l’analyse.")
         # Footer
 st.caption("Application développée avec Streamlit et Shapely")
+
 
 
 
