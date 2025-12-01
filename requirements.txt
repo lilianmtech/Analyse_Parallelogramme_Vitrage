@@ -3,5 +3,3 @@ reportlab
 shapely
 sympy
 scipy
-
-
