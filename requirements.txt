@@ -4,3 +4,4 @@ shapely
 sympy
 scipy
 matplotlib
+math
