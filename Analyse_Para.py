@@ -10,6 +10,7 @@ from math import *
 from numpy import *
 from shapely import *
 from scipy.optimize import minimize_scalar
+import builtins
 
 class Vitrage:
     def __init__(self,cadre_0,cadre_def,Gamme,raico,pf,calage_lateral='Sans'):
@@ -354,8 +355,8 @@ class Vitrage:
         Ctrl_gauche_BI = A_BI[0] - A_V[0]
         Ctrl_droite_BE = B_BE[0] - B_V [0]
         Ctrl_droite_BI =  B_V[0] - B_BI[0]
-        Ctrl_haut_BE = __builtins__.min(A_BE[1] - A_V [1],B_BE[1] - B_V [1])
-        Ctrl_haut_BI = __builtins__.min( A_V [1] - A_BI[1],B_V [1] - B_BI[1])
+        Ctrl_haut_BE = builtins.min(A_BE[1] - A_V [1],B_BE[1] - B_V [1])
+        Ctrl_haut_BI = builtins.min( A_V [1] - A_BI[1],B_V [1] - B_BI[1])
         
         if self.calage_lateral == 'Avec' :
             if contact_cale == 'droite':
@@ -366,7 +367,7 @@ class Vitrage:
 
         Vitrage_T_R = Polygon(Vitrage_T_R)
         
-        data = [round(__builtins__.min(Ctrl_gauche_BE,Ctrl_gauche_BI),1),round(__builtins__.min(Ctrl_droite_BE,Ctrl_droite_BI),1),round(__builtins__.min(Ctrl_haut_BE,Ctrl_haut_BI),1)]
+        data = [round(builtins.min(Ctrl_gauche_BE,Ctrl_gauche_BI),1),round(builtins.min(Ctrl_droite_BE,Ctrl_droite_BI),1),round(builtins.min(Ctrl_haut_BE,Ctrl_haut_BI),1)]
         graph = [Cadre, Borne_ext, Vitrage_T_R, Borne_int]
         
         return data, graph
@@ -1041,6 +1042,7 @@ else:
     st.info("📥 Importez un fichier Excel pour commencer l’analyse.")
         # Footer
 st.caption("Application développée avec Streamlit et Shapely")
+
 
 
 
