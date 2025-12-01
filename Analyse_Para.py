@@ -1096,7 +1096,7 @@ if uploaded_file:
             st.download_button(
                 label="⬇️ Télécharger le Rapport PDF",
                 data=st.session_state['pdf_buffer'],
-                file_name="rapport_quadrilateres.pdf",
+                file_name="rapport_parallelo_vitrage.pdf",
                 mime="application/pdf",
                 use_container_width=True,
                 key="download_pdf_button"
@@ -1107,6 +1107,7 @@ else:
     st.info("📥 Importez un fichier Excel pour commencer l’analyse.")
         # Footer
 st.caption("Application développée avec Streamlit et Shapely")
+
 
 
 
