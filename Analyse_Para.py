@@ -814,6 +814,7 @@ def generer_rapport_pdf(df, graphs):
                        bbox=dict(boxstyle='round', facecolor='#E8F4F8', alpha=0.8))
     
         # Pied de page
+        from datetime import datetime
         date_rapport = datetime.now().strftime("%d/%m/%Y")
         fig_titre.text(0.5, 0.25, f"Date du rapport: {date_rapport}",
                        ha='center', va='center',
@@ -1106,6 +1107,7 @@ else:
     st.info("📥 Importez un fichier Excel pour commencer l’analyse.")
         # Footer
 st.caption("Application développée avec Streamlit et Shapely")
+
 
 
 
