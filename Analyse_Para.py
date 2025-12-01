@@ -394,7 +394,7 @@ def generer_rapport_pdf(df, graphs):
                        fontsize=10)
 
         #Mettre une image
-        img = mpimg.imread("logo-couleur.png")
+        img = mpimg.imread(url+"logo-couleur.png")
         ax = fig_titre.add_axes([0.38, 0.43, 0.25, 0.1375])  # [left, bottom, width, height]
         ax.imshow(img)
         ax.axis("off")
@@ -488,19 +488,19 @@ choix = st.selectbox("Calage latéral :", ["Sans", "Avec"])
 
 # --- Ligne 1 ---
 ligne1_col1, ligne1_col2 = st.columns(2)
-
+url = 'https://github.com/lilianmtech/Analyse_Parallelogramme_Vitrage/blob/main/'
 with ligne1_col1:
     if choix == "Sans":
-        st.image("Borne_M.png", caption="Bornes sur montants", width=450)
+        st.image(url+"Borne_M.png", caption="Bornes sur montants", width=450)
     elif choix == "Avec":
-        st.image("Borne_M_C.png", caption="Bornes sur montants", width=450)
+        st.image(url+"Borne_M_C.png", caption="Bornes sur montants", width=450)
 
 
 with ligne1_col2:
     if choix == "Sans":
-        st.image("Borne_T.png", caption="Bornes sur traverses", width=400)
+        st.image(url+"Borne_T.png", caption="Bornes sur traverses", width=400)
     elif choix == "Avec":
-        st.image("Borne_T_C.png", caption="Bornes sur traverses", width=400)   
+        st.image(url+"Borne_T_C.png", caption="Bornes sur traverses", width=400)   
 
 # --- Ligne 2 ---
 ligne2_col1, ligne2_col2 = st.columns(2)
@@ -678,3 +678,4 @@ else:
     st.info("📥 Importez un fichier Excel pour commencer l’analyse.")
         # Footer
 st.caption("Application développée avec Streamlit et Shapely")
+
