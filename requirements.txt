@@ -3,3 +3,4 @@ reportlab
 shapely
 sympy
 scipy
+matplotlib
