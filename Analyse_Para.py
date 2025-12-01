@@ -1063,7 +1063,7 @@ if uploaded_file:
             with st.spinner("Génération du rapport PDF en cours..."):
                 try:
                     pdf = generer_rapport_pdf(df_affichage, graphs)
-                    pdf_buffer=Ajout_Titre(pdf, 'https://github.com/lilianmtech/Analyse_Parallelogramme_Vitrage/blob/main/logo-couleur.png?raw=true', 0.3, 0.50, 0.8, 0.8):
+                    pdf_buffer=Ajout_Titre(pdf, 'https://github.com/lilianmtech/Analyse_Parallelogramme_Vitrage/blob/main/logo-couleur.png?raw=true', 0.3, 0.50, 0.8, 0.8)
                     st.session_state['pdf_buffer'] = pdf_buffer
                     st.session_state['pdf_generated'] = True
                     st.success("✅ Rapport PDF généré avec succès !")
@@ -1086,6 +1086,7 @@ else:
     st.info("📥 Importez un fichier Excel pour commencer l’analyse.")
         # Footer
 st.caption("Application développée avec Streamlit et Shapely")
+
 
 
 
