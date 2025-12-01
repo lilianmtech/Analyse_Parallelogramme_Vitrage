@@ -767,9 +767,9 @@ def generer_rapport_pdf(df, graphs):
         response = requests.get(url_logo)
         img = mpimg.imread(io.BytesIO(response.content))
         orig_height, orig_width = img.shape[:2]
-        scale = 0.5
-        img_width = orig_width * scale
-        img_height = orig_height * scale
+        taille = 0.5
+        img_width = orig_width * taille
+        img_height = orig_height * taille
         ax = fig_titre.add_axes([0.45, 0.5, img_width, img_height])  # [left, bottom, img_width, img_height]
         ax.imshow(img)
         ax.axis("off")
@@ -1095,6 +1095,7 @@ else:
     st.info("📥 Importez un fichier Excel pour commencer l’analyse.")
         # Footer
 st.caption("Application développée avec Streamlit et Shapely")
+
 
 
 
