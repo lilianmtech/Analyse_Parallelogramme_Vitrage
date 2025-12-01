@@ -536,12 +536,12 @@ def visualiser_quadrilateres(quadrilateres, titre_page=None):
     
     # Trouver le coin supérieur gauche (point avec x min et y max)
     points1 = list(zip(x1, y1))
-    coin_haut_gauche = min(points1, key=lambda p: p[0] - p[1])  # x minimum, y maximum
+    coin_haut_gauche = builtins.min(points1, key=lambda p: p[0] - p[1])  # x minimum, y maximum
     
     # Calculer la taille de la zone de zoom basée sur la taille du quadrilatère
-    largeur_quad1 = max(x1) - min(x1)
-    hauteur_quad1 = max(y1) - min(y1)
-    marge = max(largeur_quad1, hauteur_quad1) * 0.01  # 1% de marge
+    largeur_quad1 = builtins.max(x1) - builtins.min(x1)
+    hauteur_quad1 = builtins.max(y1) - builtins.min(y1)
+    marge = builtins.max(largeur_quad1, hauteur_quad1) * 0.01  # 1% de marge
     
     ax1.set_xlim(coin_haut_gauche[0] - marge, coin_haut_gauche[0] + marge)
     ax1.set_ylim(coin_haut_gauche[1] - marge, coin_haut_gauche[1] + marge)
@@ -555,12 +555,12 @@ def visualiser_quadrilateres(quadrilateres, titre_page=None):
     
     # Trouver le coin supérieur droit (point avec x max et y max)
     points4 = list(zip(x4, y4))
-    coin_haut_droit = max(points4, key=lambda p: p[0] + p[1])  # x maximum, y maximum
+    coin_haut_droit = builtins.max(points4, key=lambda p: p[0] + p[1])  # x maximum, y maximum
     
     # Calculer la taille de la zone de zoom basée sur la taille du quadrilatère
-    largeur_quad4 = max(x4) - min(x4)
-    hauteur_quad4 = max(y4) - min(y4)
-    marge = max(largeur_quad4, hauteur_quad4) * 0.01  # 1% de marge
+    largeur_quad4 = builtins.max(x4) - builtins.min(x4)
+    hauteur_quad4 = builtins.max(y4) - builtins.min(y4)
+    marge = builtins.max(largeur_quad4, hauteur_quad4) * 0.01  # 1% de marge
     
     ax2.set_xlim(coin_haut_droit[0] - marge, coin_haut_droit[0] + marge)
     ax2.set_ylim(coin_haut_droit[1] - marge, coin_haut_droit[1] + marge)
@@ -659,11 +659,11 @@ def creer_page_complete(ligne_data, quadrilateres):
     quad1 = quadrilateres[2]
     x1, y1 = quad1.exterior.xy
     points1 = list(zip(x1, y1))
-    coin_haut_gauche = min(points1, key=lambda p: p[0] - p[1])
+    coin_haut_gauche = builtins.min(points1, key=lambda p: p[0] - p[1])
     
-    largeur_quad1 = max(x1) - min(x1)
-    hauteur_quad1 = max(y1) - min(y1)
-    marge = max(largeur_quad1, hauteur_quad1) * 0.01
+    largeur_quad1 = builtins.max(x1) - builtins.min(x1)
+    hauteur_quad1 = builtins.max(y1) - builtins.min(y1)
+    marge = builtins.max(largeur_quad1, hauteur_quad1) * 0.01
     
     ax1.set_xlim(coin_haut_gauche[0] - marge, coin_haut_gauche[0] + marge)
     ax1.set_ylim(coin_haut_gauche[1] - marge, coin_haut_gauche[1] + marge)
@@ -691,11 +691,11 @@ def creer_page_complete(ligne_data, quadrilateres):
     quad4 = quadrilateres[2]
     x4, y4 = quad4.exterior.xy
     points4 = list(zip(x4, y4))
-    coin_haut_droit = max(points4, key=lambda p: p[0] + p[1])
+    coin_haut_droit = builtins.max(points4, key=lambda p: p[0] + p[1])
     
-    largeur_quad4 = max(x4) - min(x4)
-    hauteur_quad4 = max(y4) - min(y4)
-    marge = max(largeur_quad4, hauteur_quad4) * 0.01
+    largeur_quad4 = builtins.max(x4) - builtins.min(x4)
+    hauteur_quad4 = builtins.max(y4) - builtins.min(y4)
+    marge = builtins.max(largeur_quad4, hauteur_quad4) * 0.01
     
     ax2.set_xlim(coin_haut_droit[0] - marge, coin_haut_droit[0] + marge)
     ax2.set_ylim(coin_haut_droit[1] - marge, coin_haut_droit[1] + marge)
@@ -1042,6 +1042,7 @@ else:
     st.info("📥 Importez un fichier Excel pour commencer l’analyse.")
         # Footer
 st.caption("Application développée avec Streamlit et Shapely")
+
 
 
 
