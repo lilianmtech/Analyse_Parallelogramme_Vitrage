@@ -11,7 +11,7 @@ from numpy import *
 from shapely import *
 from scipy.optimize import minimize_scalar
 import builtins
-import io import BytesIO
+import io
 import requests
 
 class Vitrage:
@@ -1046,6 +1046,7 @@ else:
     st.info("📥 Importez un fichier Excel pour commencer l’analyse.")
         # Footer
 st.caption("Application développée avec Streamlit et Shapely")
+
 
 
 
