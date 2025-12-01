@@ -766,7 +766,11 @@ def generer_rapport_pdf(df, graphs):
         url_logo = 'https://github.com/lilianmtech/Analyse_Parallelogramme_Vitrage/blob/main/logo-couleur.png?raw=true'
         response = requests.get(url_logo)
         img = mpimg.imread(io.BytesIO(response.content))
-        ax = fig_titre.add_axes([0.38, 0.43, 0.25, 0.1375])  # [left, bottom, width, height]
+        orig_width, orig_height = img.getSize()
+        scale = 0.5
+        img_width = orig_width * scale
+        img_height = orig_height * scale
+        ax = fig_titre.add_axes([0.38, 0.43, 0.25, 0.1375])  # [left, bottom, img_width, img_height]
         ax.imshow(img)
         ax.axis("off")
 
@@ -1091,6 +1095,7 @@ else:
     st.info("📥 Importez un fichier Excel pour commencer l’analyse.")
         # Footer
 st.caption("Application développée avec Streamlit et Shapely")
+
 
 
 
