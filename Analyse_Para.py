@@ -723,12 +723,12 @@ def creer_page_complete(ligne_data, quadrilateres):
     else:
         Sens_x = 'gauche'
 
-    if round(max(abs(A_c[0]-D_c[0]),abs(B_c[0]-C_c[0])),1) == 0:
+    if round(builtins.max(abs(A_c[0]-D_c[0]),abs(B_c[0]-C_c[0])),1) == 0:
         annotation_text = f"""Le montant de {Sens_y} descend de {round(abs(D_c[1]-C_c[1]),1)}mm par rapport au montant de {opp}.\n"""
     elif round(abs(D_c[1]-C_c[1]),1) == 0:
-        annotation_text = f""" La traverse haute se déplace de {round(max(abs(A_c[0]-D_c[0]),abs(B_c[0]-C_c[0])),1)}mm vers la {Sens_x} par rapport à la traverse basse."""
+        annotation_text = f""" La traverse haute se déplace de {round(builtins.max(abs(A_c[0]-D_c[0]),abs(B_c[0]-C_c[0])),1)}mm vers la {Sens_x} par rapport à la traverse basse."""
     else:
-        annotation_text = f"""Le montant de {Sens_y} descend de {round(abs(D_c[1]-C_c[1]),1)}mm par rapport au montant de {opp}.\n La traverse haute se déplace de {round(max(abs(A_c[0]-D_c[0]),abs(B_c[0]-C_c[0])),1)}mm vers la {Sens_x} par rapport à la traverse basse."""
+        annotation_text = f"""Le montant de {Sens_y} descend de {round(abs(D_c[1]-C_c[1]),1)}mm par rapport au montant de {opp}.\n La traverse haute se déplace de {round(builtins.max(abs(A_c[0]-D_c[0]),abs(B_c[0]-C_c[0])),1)}mm vers la {Sens_x} par rapport à la traverse basse."""
 
     ax_annotation.text(0.5, 0.5, annotation_text, 
                       ha='center', va='center', 
@@ -995,17 +995,17 @@ if uploaded_file:
     else:
         Sens_x = 'gauche'
 
-    if round(max(abs(A_c[0]-D_c[0]),abs(B_c[0]-C_c[0])),1) == 0:
+    if round(builtins.max(abs(A_c[0]-D_c[0]),abs(B_c[0]-C_c[0])),1) == 0:
         st.info(f"""📐
         Le montant de **{Sens_y}** descend de **{round(abs(D_c[1]-C_c[1]),1)}mm** par rapport au montant de {opp}.
         """)
     elif round(abs(D_c[1]-C_c[1]),1) == 0:
         st.info(f"""📐
-        La traverse haute se déplace de **{round(max(abs(A_c[0]-D_c[0]),abs(B_c[0]-C_c[0])),1)}mm** vers la **{Sens_x}** par rapport à la traverse basse.
+        La traverse haute se déplace de **{round(builtins.max(abs(A_c[0]-D_c[0]),abs(B_c[0]-C_c[0])),1)}mm** vers la **{Sens_x}** par rapport à la traverse basse.
         """)
     else:
         st.info(f"""📐
-        Le montant de **{Sens_y}** descend de **{round(abs(D_c[1]-C_c[1]),1)}mm** par rapport au montant de {opp}.\n La traverse haute se déplace de **{round(max(abs(A_c[0]-D_c[0]),abs(B_c[0]-C_c[0])),1)}mm** vers la **{Sens_x}** par rapport à la traverse basse.
+        Le montant de **{Sens_y}** descend de **{round(abs(D_c[1]-C_c[1]),1)}mm** par rapport au montant de {opp}.\n La traverse haute se déplace de **{round(builtins.max(abs(A_c[0]-D_c[0]),abs(B_c[0]-C_c[0])),1)}mm** vers la **{Sens_x}** par rapport à la traverse basse.
         """)
 
     
@@ -1042,6 +1042,7 @@ else:
     st.info("📥 Importez un fichier Excel pour commencer l’analyse.")
         # Footer
 st.caption("Application développée avec Streamlit et Shapely")
+
 
 
 
