@@ -842,7 +842,7 @@ def Ajout_Titre(input_pdf, watermark_url, transparency, scale, pos_y, pos_x):
     # Télécharger l'image depuis GitHub (raw URL)
     response = requests.get(watermark_url)
     img_data = io.BytesIO(response.content)
-    img = ImageReader(img_data)
+    img = mpimg.imread(img_data)
 
     # Dimensions originales de l'image
     orig_width, orig_height = img.getSize()
@@ -1095,6 +1095,7 @@ else:
     st.info("📥 Importez un fichier Excel pour commencer l’analyse.")
         # Footer
 st.caption("Application développée avec Streamlit et Shapely")
+
 
 
 
