@@ -1,6 +1,5 @@
 import streamlit as st
 import pandas as pd
-from Vitrage_2 import *
 import numpy as np
 import matplotlib.pyplot as plt
 import openpyxl as xl
@@ -678,4 +677,5 @@ else:
     st.info("📥 Importez un fichier Excel pour commencer l’analyse.")
         # Footer
 st.caption("Application développée avec Streamlit et Shapely")
+
 
