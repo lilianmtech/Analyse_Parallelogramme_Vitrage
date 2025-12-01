@@ -748,73 +748,84 @@ def generer_rapport_pdf(df, graphs):
     """Génère un rapport PDF avec toutes les lignes au format A4 PAYSAGE"""
     buffer = io.BytesIO()
     
-    with PdfPages(buffer) as pdf:
-        # Page de titre - Format A4 PAYSAGE
-        fig_titre = plt.figure(figsize=(11.69, 8.27))
-        
-        # En-tête institutionnel
-        fig_titre.text(0.5, 0.65, "ANALYSE DE LA MISE EN PARALLELOGRAMME\n DES VITRAGES", 
-                       ha='center', va='center', 
-                       fontsize=16, fontweight='bold', family='Sans')
-        
-        # Ligne de séparation
-        fig_titre.text(0.5, 0.60, "─" * 80, 
-                       ha='center', va='center', 
-                       fontsize=10)
+with PdfPages(buffer) as pdf:
+    # Page de titre - Format A4 PAYSAGE
+    fig_titre = plt.figure(figsize=(11.69, 8.27))  # A4 paysage en pouces
 
-        #Mettre une image
-        url_logo = 'https://github.com/lilianmtech/Analyse_Parallelogramme_Vitrage/blob/main/logo-couleur.png?raw=true'
-        response = requests.get(url_logo)
-        img = mpimg.imread(io.BytesIO(response.content))
-        orig_height, orig_width = img.shape[:2]
-        taille = 0.5
-        img_width = orig_width * taille
-        img_height = orig_height * taille
-        ax = fig_titre.add_axes([0.45, 0.5, img_width, img_height])  # [left, bottom, img_width, img_height]
-        ax.imshow(img)
-        ax.axis("off")
+    # En-tête institutionnel
+    fig_titre.text(0.5, 0.65,
+                   "ANALYSE DE LA MISE EN PARALLELOGRAMME\n DES VITRAGES",
+                   ha='center', va='center',
+                   fontsize=16, fontweight='bold', family='Sans')
 
-        # Résumer
-        mask = (df[["Ecart minimal // bornes gauche (mm)", "Ecart minimal // bornes droite (mm)", "Ecart minimal // bornes hautes (mm)"]] < 0).any(axis=1)
-        nb_non_conforme = mask.sum()
-        nb_conforme = len(df)-nb_non_conforme
-        
-        Gammes = df["Gamme"].value_counts().index
-        i=0
-        for g in Gammes:
-            if i==0:
-                Gamme = str(g)
-            else :
-                Gamme += f" & {g}"
-            i = i+1
-        
-        print(Gammes)
-        stats_text = f"""
+    # Ligne de séparation
+    fig_titre.text(0.5, 0.60, "─" * 80,
+                   ha='center', va='center',
+                   fontsize=10)
+
+    # Mettre une image (logo)
+    url_logo = 'https://github.com/lilianmtech/Analyse_Parallelogramme_Vitrage/blob/main/logo-couleur.png?raw=true'
+    response = requests.get(url_logo)
+    img = mpimg.imread(io.BytesIO(response.content))
+    orig_height, orig_width = img.shape[:2]
+
+    # Dimensions de la figure en pixels
+    fig_width_px, fig_height_px = fig_titre.get_size_inches() * fig_titre.dpi
+
+    # Facteur d'échelle
+    taille = 0.5  # 50% de la taille originale
+
+    # Taille de l'image en pixels après mise à l'échelle
+    img_width_px = orig_width * taille
+    img_height_px = orig_height * taille
+
+    # Conversion en fractions de la figure
+    img_width_frac = img_width_px / fig_width_px
+    img_height_frac = img_height_px / fig_height_px
+
+    # Position en fractions (centrage autour de 0.5, 0.5 par exemple)
+    left = 0.45
+    bottom = 0.5
+
+    ax = fig_titre.add_axes([left, bottom, img_width_frac, img_height_frac])
+    ax.imshow(img)
+    ax.axis("off")
+
+    # Résumé
+    mask = (df[["Ecart minimal // bornes gauche (mm)",
+                "Ecart minimal // bornes droite (mm)",
+                "Ecart minimal // bornes hautes (mm)"]] < 0).any(axis=1)
+    nb_non_conforme = mask.sum()
+    nb_conforme = len(df) - nb_non_conforme
+
+    Gammes = df["Gamme"].value_counts().index
+    Gamme = " & ".join(map(str, Gammes))
+
+    stats_text = f"""
 Gamme Raico de l'étude: {Gamme}
 Nombre vitrage étudiés: {len(df)}
 Nombre de vitrage conforme: {nb_conforme}
 Nombre de vitrage non-conforme: {nb_non_conforme}
-        """
-        
-        fig_titre.text(0.5, 0.35, stats_text, 
-                       ha='center', va='center', 
-                       fontsize=10, family='Sans', style='normal',
-                       bbox=dict(boxstyle='round', facecolor='#E8F4F8', alpha=0.8))
-        
-        # Pied de page
-        from datetime import datetime
-        date_rapport = datetime.now().strftime("%d/%m/%Y")
-        fig_titre.text(0.5, 0.25, f"Date du rapport: {date_rapport}", 
-                       ha='center', va='center', 
-                       fontsize=11, family='Sans')
+    """
 
-        fig_titre.text(0.5, 0.15, "MTECHBUILD", 
-                       ha='center', va='center', 
-                       fontsize=10, style='italic', color='gray', family='Sans')
-        
-        plt.axis('off')
-        pdf.savefig(fig_titre, bbox_inches='tight')
-        plt.close(fig_titre)
+    fig_titre.text(0.5, 0.35, stats_text,
+                   ha='center', va='center',
+                   fontsize=10, family='Sans', style='normal',
+                   bbox=dict(boxstyle='round', facecolor='#E8F4F8', alpha=0.8))
+
+    # Pied de page
+    date_rapport = datetime.now().strftime("%d/%m/%Y")
+    fig_titre.text(0.5, 0.25, f"Date du rapport: {date_rapport}",
+                   ha='center', va='center',
+                   fontsize=11, family='Sans')
+
+    fig_titre.text(0.5, 0.15, "MTECHBUILD",
+                   ha='center', va='center',
+                   fontsize=10, style='italic', color='gray', family='Sans')
+
+    plt.axis('off')
+    pdf.savefig(fig_titre, bbox_inches='tight')
+    plt.close(fig_titre)
         
         # Pour chaque ligne - une page A4 PAYSAGE avec les deux graphiques côte à côte
         for idx, row in df.iterrows():
@@ -1095,6 +1106,7 @@ else:
     st.info("📥 Importez un fichier Excel pour commencer l’analyse.")
         # Footer
 st.caption("Application développée avec Streamlit et Shapely")
+
 
 
 
