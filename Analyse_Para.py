@@ -307,9 +307,9 @@ class Vitrage:
         
         Angle=degrees(asin((abs(self.D[1]-self.C[1]))/longueur_traverse_basse))
 
-        'Translation du vitrage'
+        #Translation du vitrage
         Vitrage_T = affinity.translate(Vitrage,xoff=0.0, yoff=-support_bas['T_'+cote_support_bas], zoff=0.0)
-        'Rotation du vitrage'
+        #Rotation du vitrage'
         Vitrage_T_R = affinity.rotate(Vitrage_T, signe_rotation*Angle, origin=(support_bas[cote_support_bas]))
 
         contact_cale = 'Non'
@@ -1041,6 +1041,7 @@ else:
     st.info("📥 Importez un fichier Excel pour commencer l’analyse.")
         # Footer
 st.caption("Application développée avec Streamlit et Shapely")
+
 
 
 
