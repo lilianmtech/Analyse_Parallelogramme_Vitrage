@@ -1207,10 +1207,6 @@ with tab1:
                     border-radius: 8px;
                     padding: 10px 20px;
                 }
-                div.stButton > button:first-child:hover {
-                    background-color: #008A92; /* bleu plus foncé au survol */
-                    color: #008A92;
-                }
                 </style>
             """, unsafe_allow_html=True)
             
@@ -1283,6 +1279,7 @@ with tab2:
 
         st.dataframe(styled_df, width='stretch', hide_index=True)
         st.info("""\* Critère admissible suivant le tableau 11 du cahier du CSTB 3574v2 : LPetit Côté/75""")
+
 
 
 
