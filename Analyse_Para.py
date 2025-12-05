@@ -471,7 +471,7 @@ def Dechaussement_vitrage(uploaded_file, option_calage, Raico):
 
         H =sqrt((cadre_0['A'][0] - cadre_0['D'][0])**2 + (cadre_0['A'][1] - cadre_0['D'][1])**2)
         L = sqrt((cadre_0['A'][0] - cadre_0['B'][0])**2 + (cadre_0['A'][1] - cadre_0['B'][1])**2)
-        Crit = min(H,L)/75
+        Crit = builtins.min(H,L)/75
         pf = L/1000 + H/1000
         V = Vitrage(cadre_0,cadre_def,Gamme,pf,raico=Raico,calage_lateral=option_calage)
         data, graph = V.Dechaussement()
@@ -550,7 +550,7 @@ def Gauchissement_vitrage(uploaded_file):
 
         H = sqrt((cadre_0['A'][0] - cadre_0['D'][0])**2 + (cadre_0['A'][1] - cadre_0['D'][1])**2)
         L = sqrt((cadre_0['A'][0] - cadre_0['B'][0])**2 + (cadre_0['A'][1] - cadre_0['B'][1])**2)
-        Crit = min(H,L)/75
+        Crit = builtins.min(H,L)/75
         pf = L/1000 + H/1000
         V = Vitrage(cadre_0,cadre_def,Gamme,pf)
         data = V.DiffHorsPlan()
@@ -1269,4 +1269,5 @@ with tab2:
 
         st.dataframe(styled_df, width='stretch', hide_index=True)
         st.info("""\* Critère admissible suivant le tableau 11 du cahier du CSTB 3574v2 : LPetit Côté/75""")
+
 
