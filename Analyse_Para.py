@@ -1199,6 +1199,20 @@ with tab1:
         with col_pdf2:
             st.subheader("📄 Rapport PDF Complet")
             st.write("Téléchargez un rapport PDF contenant les détails et visualisations de toutes les lignes")
+            st.markdown("""
+                <style>
+                div.stButton > button:first-child {
+                    background-color: #17A2A8; /* bleu */
+                    color: white;              /* texte en blanc */
+                    border-radius: 8px;
+                    padding: 10px 20px;
+                }
+                div.stButton > button:first-child:hover {
+                    background-color: #008A92; /* bleu plus foncé au survol */
+                    color: #fff;
+                }
+                </style>
+            """, unsafe_allow_html=True)
             
             # Bouton pour générer le PDF
             if st.button("🔄 Générer le Rapport PDF", use_container_width=True, type="primary"):
@@ -1269,5 +1283,6 @@ with tab2:
 
         st.dataframe(styled_df, width='stretch', hide_index=True)
         st.info("""\* Critère admissible suivant le tableau 11 du cahier du CSTB 3574v2 : LPetit Côté/75""")
+
 
 
