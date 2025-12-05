@@ -78,7 +78,6 @@ class Vitrage:
         distances["B"] = self.distance_point_plan(self.D, self.A, self.C, self.B)
         distances["C"] = self.distance_point_plan(self.A, self.B, self.D, self.C)
         distances["D"] = self.distance_point_plan(self.B, self.A, self.C, self.D)
-        print(distances)
         return builtins.max(distances.values())
     
     def inner_rect_with_offsets(self,quad, offset_top, offset_bottom, offset_lr):
@@ -439,7 +438,6 @@ def Dechaussement_vitrage(uploaded_file, option_calage, Raico):
         cadre_0 = {}
         
         for key, label in labels.items():
-            print([label][0],[labels["D"]][0])
             x = Coord[label][0] + Depl[label][0] - (Coord[labels["D"]][0] + Depl[labels["D"]][0])
             if key == "D":  # cas particulier pour D
                 x = 0
@@ -519,7 +517,6 @@ def Gauchissement_vitrage(uploaded_file):
         cadre_0 = {}
         
         for key, label in labels.items():
-            print([label][0],[labels["D"]][0])
             x = Coord[label][0] + Depl[label][0] - (Coord[labels["D"]][0] + Depl[labels["D"]][0])
             if key == "D":  # cas particulier pour D
                 x = 0
@@ -1272,3 +1269,4 @@ with tab2:
 
         st.dataframe(styled_df, width='stretch', hide_index=True)
         st.info("""\* Critère admissible suivant le tableau 11 du cahier du CSTB 3574v2 : LPetit Côté/75""")
+
