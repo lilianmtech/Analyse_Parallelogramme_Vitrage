@@ -1,3 +1,4 @@
+
 import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -18,7 +19,7 @@ from reportlab.pdfgen import canvas
 from reportlab.lib.utils import ImageReader
 
 class Vitrage:
-    def __init__(self,cadre_0,cadre_def,Gamme,raico,pf,calage_lateral='Sans'):
+    def __init__(self,cadre_0,cadre_def,Gamme,pf,raico = None,calage_lateral='Sans'):
         self.Gamme = Gamme
         self.A = cadre_def['A']
         self.B = cadre_def['B']
@@ -36,65 +37,49 @@ class Vitrage:
         self.cale_bas = 100
         self.cale_laterale = 100
 
-    def DiffHorsPlan(self):
-        "Vecteur normal"
+    def distance_point_plan(self, P1, P2, P3, Ptest):
+            #Vecteur normal
         a = sy.Symbol('a')
         b = 1
         c = sy.Symbol('c')
         
-        "Coeffiecient directeur de AB"
-        x1 = self.B[0]-self.A[0]
-        y1 = self.B[1]-self.A[1]
-        z1 = self.B[2]-self.A[2]
+        #Coeffiecient directeur de AB
+        x1 = P2[0]-P1[0]
+        y1 = P2[1]-P1[1]
+        z1 = P2[2]-P1[2]
         
-        "Coeffiecient directeur de AD"
-        x2 = self.D[0]-self.A[0]
-        y2 = self.D[1]-self.A[1]
-        z2 = self.D[2]-self.A[2]
+        #Coeffiecient directeur de AD
+        x2 = P3[0]-P1[0]
+        y2 = P3[1]-P1[1]
+        z2 = P3[2]-P1[2]
         
-        "Détermination des coef du vecteur normal"
+        #Détermination des coef du vecteur normal
         eq1 = sy.Eq(a*x1 + b*y1 + c*z1 , 0)
         eq2 = sy.Eq(a*x2 + b*y2 + c*z2 , 0)
         sol1 = sy.solve((eq1,eq2),(a,c))
         
         if sol1 == []:
-            distance = 'None'
+            distance = 0
         else:
             a=float(sol1[a])
             c=float(sol1[c])
             
-            "Détermination des coef de l'équation de plan"
-            d = -a*self.A[0]-b*self.A[1]-c*self.A[2]
+            #Détermination des coef de l'équation de plan
+            d = -a*P1[0]-b*P1[1]-c*P1[2]
             
-            "Distance entre point et plan"
-            distance = abs(a*self.C[0]+b*self.C[1]+c*self.C[2]+d)/sqrt(a**2+b**2+c**2)
-            
-        #-----------Distance entre le sommet et le centre de la diagonale---------
-        X = sy.Symbol('X')
-        
-        O = []
-        
-        "Coefficient droite AC"
-        a1 = (self.C[1]-self.A[1])/(self.C[0]-self.A[0])
-        b1 = self.C[1] - (a1*self.C[0])
-        
-        "Coefficient droite BD"
-        a2 = (self.D[1]-self.B[1])/(self.D[0]-self.B[0])
-        b2 = self.D[1] - (a2*self.D[0])
-        
-        eq3 = sy.Eq(a1*X + b1 - a2*X - b2 , 0)
-        sol3 = sy.solve(eq3,X)
-        O.append(float(sol3[0]))
-        O.append(a1*O[0]+b1)
-        
-        LO = sqrt((O[0]-self.C[0])**2+(O[1]-self.C[1])**2)
-        
-        if abs(distance)<abs(LO/75):
-            Gauchissement = 'OK'
-        else:
-            Gauchissement = 'NOK'
+            #Distance entre point et plan
+            distance = abs(a*Ptest[0]+b*Ptest[1]+c*Ptest[2]+d)/sqrt(a**2+b**2+c**2)
 
         return distance
+
+    def DiffHorsPlan(self):
+        distances = {}
+        distances["A"] = self.distance_point_plan(self.C, self.B, self.D, self.A)
+        distances["B"] = self.distance_point_plan(self.D, self.A, self.C, self.B)
+        distances["C"] = self.distance_point_plan(self.A, self.B, self.D, self.C)
+        distances["D"] = self.distance_point_plan(self.B, self.A, self.C, self.D)
+        print(distances)
+        return builtins.max(distances.values())
     
     def inner_rect_with_offsets(self,quad, offset_top, offset_bottom, offset_lr):
         """
@@ -479,7 +464,6 @@ def Dechaussement_vitrage(uploaded_file, option_calage, Raico):
             cadre_0[key] = [x_0, y_0, z_0]
         
         angle = degrees(arctan(cadre_0['A'][2]/cadre_0['A'][1]))
-        print(angle)
 
         for key, coords in cadre_def.items():
              cadre_def[key] = rot_repere(angle,coords)
@@ -487,11 +471,11 @@ def Dechaussement_vitrage(uploaded_file, option_calage, Raico):
         for key, coords in cadre_0.items():
              cadre_0[key] = rot_repere(angle,coords)
 
-        H = abs(cadre_0['A'][1]-cadre_0['D'][1])
-        L = abs(cadre_0['A'][0]-cadre_0['B'][0])
-        diag = sqrt(H**2+L**2)
+        H =sqrt((cadre_0['A'][0] - cadre_0['D'][0])**2 + (cadre_0['A'][1] - cadre_0['D'][1])**2)
+        L = sqrt((cadre_0['A'][0] - cadre_0['B'][0])**2 + (cadre_0['A'][1] - cadre_0['B'][1])**2)
+        Crit = min(H,L)/75
         pf = L/1000 + H/1000
-        V = Vitrage(cadre_0,cadre_def,Gamme,Raico,pf,calage_lateral=option_calage,)
+        V = Vitrage(cadre_0,cadre_def,Gamme,pf,raico=Raico,calage_lateral=option_calage)
         data, graph = V.Dechaussement()
 
         datas['ID vitrage'].append(str(labels["A"])+' / '+str(labels["B"])+' / '+str(labels["C"])+' / '+str(labels["D"]))
@@ -505,6 +489,79 @@ def Dechaussement_vitrage(uploaded_file, option_calage, Raico):
         graphs['Graph'].append(graph)
         
     return datas, graphs
+
+def Gauchissement_vitrage(uploaded_file):
+    Feuille_coord = 'Coord_Points'
+    Coord,Depl = CoordPoint(uploaded_file,Feuille_coord)
+    
+    document =xl.load_workbook(uploaded_file,data_only=True)
+    sheet = document['Cadres']
+    max_row = sheet.max_row
+    datas = {
+        'ID vitrage': [],
+        'Gauchissement (mm)': [],
+        'Critère (mm)*': [],
+    }
+
+    for row in range(3, max_row+1) :
+        if sheet.cell(row+1, column=2).value == None:
+            break
+        
+        labels = {
+            "A": sheet.cell(row + 1, column=2).value,
+            "B": sheet.cell(row + 1, column=3).value,
+            "C": sheet.cell(row + 1, column=4).value,
+            "D": sheet.cell(row + 1, column=5).value,
+        }
+        Gamme = sheet.cell(row + 1, column=6).value        
+        
+        cadre_def = {}
+        cadre_0 = {}
+        
+        for key, label in labels.items():
+            print([label][0],[labels["D"]][0])
+            x = Coord[label][0] + Depl[label][0] - (Coord[labels["D"]][0] + Depl[labels["D"]][0])
+            if key == "D":  # cas particulier pour D
+                x = 0
+
+            if key == "A":
+                y = Coord[label][1] - Depl[labels["D"]][1] - (Coord[labels["D"]][1] - Depl[labels["D"]][1])
+            elif key == "B":
+                y = Coord[label][1] - Depl[labels["C"]][1] - (Coord[labels["D"]][1] - Depl[labels["D"]][1])
+            elif key == "C":
+                y = Coord[label][1] - Depl[labels["C"]][1] - (Coord[labels["D"]][1] - Depl[labels["D"]][1])
+            else:  # D
+                y = Coord[label][1] - Depl[label][1] - (Coord[labels["D"]][1] - Depl[labels["D"]][1])
+
+            z = Coord[label][2] + Depl[label][2]
+
+            cadre_def[key] = [x, y, z]
+
+            x_0 = Coord[label][0] - Coord[labels["D"]][0]
+            y_0 = Coord[label][1] - Coord[labels["D"]][1]
+            z_0 = Coord[label][2]
+
+            cadre_0[key] = [x_0, y_0, z_0]
+        
+        angle = degrees(arctan(cadre_0['A'][2]/cadre_0['A'][1]))
+
+        for key, coords in cadre_def.items():
+             cadre_def[key] = rot_repere(angle,coords)
+
+        for key, coords in cadre_0.items():
+             cadre_0[key] = rot_repere(angle,coords)
+
+        H = sqrt((cadre_0['A'][0] - cadre_0['D'][0])**2 + (cadre_0['A'][1] - cadre_0['D'][1])**2)
+        L = sqrt((cadre_0['A'][0] - cadre_0['B'][0])**2 + (cadre_0['A'][1] - cadre_0['B'][1])**2)
+        Crit = min(H,L)/75
+        pf = L/1000 + H/1000
+        V = Vitrage(cadre_0,cadre_def,Gamme,pf)
+        data = V.DiffHorsPlan()
+
+        datas['ID vitrage'].append(str(labels["A"])+' / '+str(labels["B"])+' / '+str(labels["C"])+' / '+str(labels["D"]))
+        datas['Gauchissement (mm)'].append(data)
+        datas['Critère (mm)*'].append(Crit)  
+    return datas
 
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -906,247 +963,312 @@ def colorer_valeurs(val):
     return f"color: {color}; font-weight: bold;"
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+url = 'https://github.com/lilianmtech/Analyse_Parallelogramme_Vitrage/blob/main/'
+
 # Configuration de la page
-st.set_page_config(page_title="Analyse de la mise en parallélogramme", layout="wide")
+st.set_page_config(page_title="Compatibilité des déformations du support avec l’intégrité des vitrages", layout="wide")
+
+    #---------------------------Importation des données---------------------------
+
+st.sidebar.image(url+"logo-couleur.png?raw=true",width=200)
+
+  # Section d'import de fichier Excel (commune aux deux onglets)
+st.sidebar.header("📁 Import de données")
+uploaded_file = st.sidebar.file_uploader("Importer un fichier de données (CSV ou Excel)", type=["csv", "xlsx"])
+
 
 # Titre de l'application
-st.title("🏢 Analyse de la mise en parallélogramme des vitrages")
+st.markdown(
+    """
+    <h2 style='text-align: center; 
+            color: #008A92; 
+            font-family: Verdana; 
+            font-size:30px;
+            background-color: white;
+            padding: 20px; 
+            border-radius: 1px;'>
+        Compatibilité des déformations du support avec l’intégrité des vitrages
+    </h2>
+    """,
+    unsafe_allow_html=True
+)
 
-choix = st.selectbox("Calage latéral :", ["Sans", "Avec"])
-
-# --- Ligne 1 ---
-ligne1_col1, ligne1_col2 = st.columns(2)
-url = 'https://github.com/lilianmtech/Analyse_Parallelogramme_Vitrage/blob/main/'
-with ligne1_col1:
-    if choix == "Sans":
-        st.image(url+"Borne_M.png"+'?raw=true', caption="Bornes sur montants", width=450)
-    elif choix == "Avec":
-        st.image(url+"Borne_M_C.png"+'?raw=true', caption="Bornes sur montants", width=450)
-
-
-with ligne1_col2:
-    if choix == "Sans":
-        st.image(url+"Borne_T.png"+'?raw=true', caption="Bornes sur traverses", width=400)
-    elif choix == "Avec":
-        st.image(url+"Borne_T_C.png"+'?raw=true', caption="Bornes sur traverses", width=400)   
-
-# --- Ligne 2 ---
-ligne2_col1, ligne2_col2 = st.columns(2)
-
-with ligne2_col1:
-    if choix == "Sans":
-        Tm1 = st.number_input("Valeur Tolérance Tm1 :", value=2.5, step=0.1, format="%.2f")
-        Tm2 = st.number_input("Valeur Tolérance Tm2 + menuiserie :", value=10.5, step=0.1, format="%.2f")
-    else:
-        Tm =  st.number_input("Valeur Tolérance Tm :", value=2.5, step=0.1, format="%.2f")
-        Ca =  st.number_input("Epaisseur cale C + menuiserie :", value=13.0, step=0.1, format="%.2f")
-        Jc =  st.number_input("Jeu entre vitrage et cale Jc :", value=2.0, step=0.1, format="%.2f")
-    
-with ligne2_col2:
-    if choix == "Sans":
-        Tt1 = st.number_input("Valeur Tolérance Tt1 :", value=5.0, step=0.1, format="%.2f")
-        Tt2 = st.number_input("Valeur Tolérance Tt2 + menuiserie :", value=13.0, step=0.1, format="%.2f")
-    else:
-        Tt1 =  st.number_input("Valeur Tolérance Tt1 :", value=5.0, step=0.1, format="%.2f")
-        Tt2 =  st.number_input("Valeur Tolérance Tt2 + menuiserie :", value=13.0, step=0.1, format="%.2f")
-        Jv =  st.number_input("Jeu entre borne basse et vitrage Jv :", value=1.0, step=0.1, format="%.2f")
-
-
-#---------------------------Importation des données---------------------------
-
-st.header("📂 Importer Fichier Excel")
-
-uploaded_file = st.file_uploader("Importer un fichier de données (CSV ou Excel)", type=["csv", "xlsx"])
-
-#---------------------------Chargement des vitrages---------------------------
-if choix == "Sans":
-    Raico = [Tm1, Tm2, Tt1, Tt2]
-
-else:
-    Raico = [Tm, Ca, Jc, Tt1, Tt2, Jv]
-
-
-if uploaded_file:
-    # Mémoriser le nom du fichier pour savoir si un nouveau fichier est importé
-    if "uploaded_name" not in st.session_state or st.session_state["uploaded_name"] != uploaded_file.name:
-        st.session_state.clear()
-        st.session_state["uploaded_name"] = uploaded_file.name
-
-    # Vérifier si un changement de paramètre nécessite une mise à jour
-    params_actuels = {
-        "choix": choix,
-        "Raico": Raico,
+st.markdown("""
+    <style>
+    /* Style du texte des onglets */
+    .stTabs [data-baseweb="tab-list"] button [data-testid="stMarkdownContainer"] p {
+        font-size: 1.7rem;
+        font-weight: 700;
+        color: #495556;
     }
 
-    if (
-        "params_prec" not in st.session_state
-        or st.session_state["params_prec"] != params_actuels
-    ):
-        datas, graphs = Dechaussement_vitrage(uploaded_file, choix, Raico)
-        st.session_state["datas"] = datas
-        st.session_state["graphs"] = graphs
-        st.session_state["params_prec"] = params_actuels
+    /* Centrage des onglets */
+    .stTabs [data-baseweb="tab-list"] {
+        justify-content: center;
+        gap: 50px;
+    }
+            
+    /* Couleur du trait de sélection */
+    .stTabs [data-baseweb="tab-highlight"] {
+        background-color: #17A2A8;
+        height: 4px; /* épaisseur du trait */
+        border-radius: 2px;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
+tab1, tab2 = st.tabs(["  Analyse de la mise en parallélogramme  ", "  Analyse du gauchissement  "])
+
+with tab1:
+    choix = st.selectbox("Calage latéral :", ["Sans", "Avec"])
+
+    # --- Ligne 1 ---
+    ligne1_col1, ligne1_col2 = st.columns(2)
+   
+    with ligne1_col1:
+        if choix == "Sans":
+            st.image(url+"Borne_M.png"+'?raw=true', caption="Bornes sur montants", width=450)
+        elif choix == "Avec":
+            st.image(url+"Borne_M_C.png"+'?raw=true', caption="Bornes sur montants", width=450)
+
+
+    with ligne1_col2:
+        if choix == "Sans":
+            st.image(url+"Borne_T.png"+'?raw=true', caption="Bornes sur traverses", width=400)
+        elif choix == "Avec":
+            st.image(url+"Borne_T_C.png"+'?raw=true', caption="Bornes sur traverses", width=400)   
+
+    # --- Ligne 2 ---
+    ligne2_col1, ligne2_col2 = st.columns(2)
+
+    with ligne2_col1:
+        if choix == "Sans":
+            Tm1 = st.number_input("Valeur Tolérance Tm1 :", value=2.5, step=0.1, format="%.2f")
+            Tm2 = st.number_input("Valeur Tolérance Tm2 + menuiserie :", value=10.5, step=0.1, format="%.2f")
+        else:
+            Tm =  st.number_input("Valeur Tolérance Tm :", value=2.5, step=0.1, format="%.2f")
+            Ca =  st.number_input("Epaisseur cale C + menuiserie :", value=13.0, step=0.1, format="%.2f")
+            Jc =  st.number_input("Jeu entre vitrage et cale Jc :", value=2.0, step=0.1, format="%.2f")
+        
+    with ligne2_col2:
+        if choix == "Sans":
+            Tt1 = st.number_input("Valeur Tolérance Tt1 :", value=5.0, step=0.1, format="%.2f")
+            Tt2 = st.number_input("Valeur Tolérance Tt2 + menuiserie :", value=13.0, step=0.1, format="%.2f")
+        else:
+            Tt1 =  st.number_input("Valeur Tolérance Tt1 :", value=5.0, step=0.1, format="%.2f")
+            Tt2 =  st.number_input("Valeur Tolérance Tt2 + menuiserie :", value=13.0, step=0.1, format="%.2f")
+            Jv =  st.number_input("Jeu entre borne basse et vitrage Jv :", value=1.0, step=0.1, format="%.2f")
+
+    #---------------------------Chargement des vitrages---------------------------
+    if choix == "Sans":
+        Raico = [Tm1, Tm2, Tt1, Tt2]
+
     else:
-        datas = st.session_state["datas"]
-        graphs = st.session_state["graphs"]
+        Raico = [Tm, Ca, Jc, Tt1, Tt2, Jv]
 
-    # -------------------- Affichage du tableau --------------------
-    st.header("📊 Tableau des Résultats")
-    df_affichage = pd.DataFrame(datas)
-    
-    styled_df = (
-    df_affichage.style
-    .map(colorer_valeurs, subset=["Ecart minimal // bornes gauche (mm)", 
-                                  "Ecart minimal // bornes droite (mm)", 
-                                  "Ecart minimal // bornes hautes (mm)"])
-    .format(precision=1)
-    .set_properties(**{'text-align': 'center'})
-    .set_properties(**{'text-align': 'center', 'vertical-align': 'middle'})
-    .set_table_styles([
-        {"selector": "th", "props": [("text-align", "center")]},
-        {"selector": "td", "props": [("text-align", "center")]}
-    ])
-)
-    st.dataframe(styled_df, width='stretch', hide_index=True)
 
-    # -------------------- Sélection et visualisation --------------------
-    st.header("🔲 Sélection et Visualisation")
-    col1, col2 = st.columns([1, 3])
+    if uploaded_file:
+        # Mémoriser le nom du fichier pour savoir si un nouveau fichier est importé
+        if "uploaded_name" not in st.session_state or st.session_state["uploaded_name"] != uploaded_file.name:
+            st.session_state.clear()
+            st.session_state["uploaded_name"] = uploaded_file.name
 
-    with col1:
-        ligne_selectionnee = st.selectbox(
-            "Sélectionnez le vitrage à visualiser :",
-            options=list(datas["ID vitrage"]),
-            key="select_vitrage",
-        )
+        # Vérifier si un changement de paramètre nécessite une mise à jour
+        params_actuels = {
+            "choix": choix,
+            "Raico": Raico,
+        }
 
-        idx = datas["ID vitrage"].index(ligne_selectionnee)
-        ligne_data = {col: datas[col][idx] for col in datas.keys()}
+        if (
+            "params_prec" not in st.session_state
+            or st.session_state["params_prec"] != params_actuels
+        ):
+            datas, graphs = Dechaussement_vitrage(uploaded_file, choix, Raico)
+            st.session_state["datas"] = datas
+            st.session_state["graphs"] = graphs
+            st.session_state["params_prec"] = params_actuels
+        else:
+            datas = st.session_state["datas"]
+            graphs = st.session_state["graphs"]
 
-        for col in ligne_data.keys():
-                if col != 'ID vitrage':
-                    st.metric(col, ligne_data[col])
+        # -------------------- Affichage du tableau --------------------
+        st.divider()
+        st.markdown("### 📊 Tableau des Résultats")
+        df_affichage = pd.DataFrame(datas)
+        
+        styled_df = (
+        df_affichage.style
+        .map(colorer_valeurs, subset=["Ecart minimal // bornes gauche (mm)", 
+                                    "Ecart minimal // bornes droite (mm)", 
+                                    "Ecart minimal // bornes hautes (mm)"])
+        .format(precision=1)
+        .set_properties(**{'text-align': 'center'})
+        .set_properties(**{'text-align': 'center', 'vertical-align': 'middle'})
+        .set_table_styles([
+            {"selector": "th", "props": [("text-align", "center")]},
+            {"selector": "td", "props": [("text-align", "center")]}
+        ])
+    )
+        st.dataframe(styled_df, width='stretch', hide_index=True)
 
-    with col2:
-        idx = graphs["ID vitrage"].index(ligne_selectionnee)
-        quadrilateres = graphs["Graph"][idx]
-        fig = visualiser_quadrilateres(quadrilateres)
-        st.pyplot(fig)
-        # Informations supplémentaires
-        cadre = graphs["Graph"][idx][0]
-        A_c,B_c,C_c,D_c,origine_c = cadre.exterior.coords
-        if D_c[1]>C_c[1]:
+        # -------------------- Sélection et visualisation --------------------
+        st.divider()
+        st.markdown("### 🔲 Sélection et Visualisation")
+        col1, col2 = st.columns([1, 3])
+
+        with col1:
+            ligne_selectionnee = st.selectbox(
+                "Sélectionnez le vitrage à visualiser :",
+                options=list(datas["ID vitrage"]),
+                key="select_vitrage",
+            )
+
+            idx = datas["ID vitrage"].index(ligne_selectionnee)
+            ligne_data = {col: datas[col][idx] for col in datas.keys()}
+
+            for col in ligne_data.keys():
+                    if col != 'ID vitrage':
+                        st.metric(col, ligne_data[col])
+                        st.markdown(
+                            """
+                            <style>
+                            /* Cible la valeur affichée dans st.metric */
+                            div[data-testid="stMetricValue"] {
+                                font-size: 20px;   /* taille plus petite */
+                            }
+
+                            /* Cible le label (titre) de la métrique */
+                            div[data-testid="stMetricLabel"] {
+                                font-size: 18px;   /* taille plus petite pour le label */
+                            }
+
+                            /* Cible la variation (delta) */
+                            div[data-testid="stMetricDelta"] {
+                                font-size: 12px;   /* taille plus petite pour le delta */
+                            }
+                            </style>
+                            """,
+                            unsafe_allow_html=True
+                        )
+
+        with col2:
+            idx = graphs["ID vitrage"].index(ligne_selectionnee)
+            quadrilateres = graphs["Graph"][idx]
+            fig = visualiser_quadrilateres(quadrilateres)
+            st.pyplot(fig)
+            # Informations supplémentaires
+            cadre = graphs["Graph"][idx][0]
+            A_c,B_c,C_c,D_c,origine_c = cadre.exterior.coords
+            if D_c[1]>C_c[1]:
+                Sens_y = 'droite'
+            else:
+                Sens_y = 'gauche'
+            if A_c[0]>D_c[0]:
+                Sens_x = 'droite'
+            else:
+                Sens_x = 'gauche'
+            
+
+            cadre = quadrilateres[0]
+        A_c, B_c, C_c, D_c, origine_c = cadre.exterior.coords
+        
+        if D_c[1] > C_c[1]:
             Sens_y = 'droite'
+            opp = 'gauche'
         else:
             Sens_y = 'gauche'
-        if A_c[0]>D_c[0]:
+            opp = 'droite'
+        if A_c[0] > D_c[0]:
             Sens_x = 'droite'
         else:
             Sens_x = 'gauche'
+
+        if round(builtins.max(abs(A_c[0]-D_c[0]),abs(B_c[0]-C_c[0])),1) == 0:
+            st.info(f"""📐
+            Le montant de **{Sens_y}** descend de **{round(abs(D_c[1]-C_c[1]),1)}mm** par rapport au montant de {opp}.
+            """)
+        elif round(abs(D_c[1]-C_c[1]),1) == 0:
+            st.info(f"""📐
+            La traverse haute se déplace de **{round(builtins.max(abs(A_c[0]-D_c[0]),abs(B_c[0]-C_c[0])),1)}mm** vers la **{Sens_x}** par rapport à la traverse basse.
+            """)
+        else:
+            st.info(f"""📐
+            Le montant de **{Sens_y}** descend de **{round(abs(D_c[1]-C_c[1]),1)}mm** par rapport au montant de {opp}.\n La traverse haute se déplace de **{round(builtins.max(abs(A_c[0]-D_c[0]),abs(B_c[0]-C_c[0])),1)}mm** vers la **{Sens_x}** par rapport à la traverse basse.
+            """)
+
         
+        st.divider()
+        col_pdf1, col_pdf2, col_pdf3 = st.columns([1, 2, 1])
+        with col_pdf2:
+            st.subheader("📄 Rapport PDF Complet")
+            st.write("Téléchargez un rapport PDF contenant les détails et visualisations de toutes les lignes")
+            
+            # Bouton pour générer le PDF
+            if st.button("🔄 Générer le Rapport PDF", use_container_width=True, type="primary"):
+                with st.spinner("Génération du rapport PDF en cours..."):
+                    try:
+                        pdf = generer_rapport_pdf(df_affichage, graphs)
+                        pdf_buffer=Ajout_Titre(pdf, 'https://github.com/lilianmtech/Analyse_Parallelogramme_Vitrage/blob/main/logo-couleur.png?raw=true', 0.3, 0.3, 0.9, 0.9)
+                        st.session_state['pdf_buffer'] = pdf_buffer
+                        st.session_state['pdf_generated'] = True
+                        st.success("✅ Rapport PDF généré avec succès !")
+                    except Exception as e:
+                        st.error(f"❌ Erreur lors de la génération : {str(e)}")
+            
+            # Bouton de téléchargement si le PDF a été généré
+            if st.session_state.get('pdf_generated', False):
+                st.download_button(
+                    label="⬇️ Télécharger le Rapport PDF",
+                    data=st.session_state['pdf_buffer'],
+                    file_name="rapport_parallelo_vitrage.pdf",
+                    mime="application/pdf",
+                    use_container_width=True,
+                    key="download_pdf_button"
+                )
+                st.info(f"📋 Le rapport contient {len(df_affichage) + 1} pages")
 
-        cadre = quadrilateres[0]
-    A_c, B_c, C_c, D_c, origine_c = cadre.exterior.coords
-    
-    if D_c[1] > C_c[1]:
-        Sens_y = 'droite'
-        opp = 'gauche'
     else:
-        Sens_y = 'gauche'
-        opp = 'droite'
-    if A_c[0] > D_c[0]:
-        Sens_x = 'droite'
-    else:
-        Sens_x = 'gauche'
+        st.sidebar.info("📥 Importez un fichier Excel pour commencer l’analyse.")
+            # Footer
+    st.caption("Application développée avec Streamlit et Shapely")
 
-    if round(builtins.max(abs(A_c[0]-D_c[0]),abs(B_c[0]-C_c[0])),1) == 0:
-        st.info(f"""📐
-        Le montant de **{Sens_y}** descend de **{round(abs(D_c[1]-C_c[1]),1)}mm** par rapport au montant de {opp}.
-        """)
-    elif round(abs(D_c[1]-C_c[1]),1) == 0:
-        st.info(f"""📐
-        La traverse haute se déplace de **{round(builtins.max(abs(A_c[0]-D_c[0]),abs(B_c[0]-C_c[0])),1)}mm** vers la **{Sens_x}** par rapport à la traverse basse.
-        """)
-    else:
-        st.info(f"""📐
-        Le montant de **{Sens_y}** descend de **{round(abs(D_c[1]-C_c[1]),1)}mm** par rapport au montant de {opp}.\n La traverse haute se déplace de **{round(builtins.max(abs(A_c[0]-D_c[0]),abs(B_c[0]-C_c[0])),1)}mm** vers la **{Sens_x}** par rapport à la traverse basse.
-        """)
+with tab2:
+    if uploaded_file:
+        # Mémoriser le nom du fichier pour savoir si un nouveau fichier est importé
+        if "uploaded_name" not in st.session_state or st.session_state["uploaded_name"] != uploaded_file.name:
+            st.session_state.clear()
+            st.session_state["uploaded_name"] = uploaded_file.name
 
-    
-    st.divider()
-    col_pdf1, col_pdf2, col_pdf3 = st.columns([1, 2, 1])
-    with col_pdf2:
-        st.subheader("📄 Rapport PDF Complet")
-        st.write("Téléchargez un rapport PDF contenant les détails et visualisations de toutes les lignes")
-        
-        # Bouton pour générer le PDF
-        if st.button("🔄 Générer le Rapport PDF", use_container_width=True, type="primary"):
-            with st.spinner("Génération du rapport PDF en cours..."):
-                try:
-                    pdf = generer_rapport_pdf(df_affichage, graphs)
-                    pdf_buffer=Ajout_Titre(pdf, 'https://github.com/lilianmtech/Analyse_Parallelogramme_Vitrage/blob/main/logo-couleur.png?raw=true', 0.3, 0.3, 0.9, 0.9)
-                    st.session_state['pdf_buffer'] = pdf_buffer
-                    st.session_state['pdf_generated'] = True
-                    st.success("✅ Rapport PDF généré avec succès !")
-                except Exception as e:
-                    st.error(f"❌ Erreur lors de la génération : {str(e)}")
-        
-        # Bouton de téléchargement si le PDF a été généré
-        if st.session_state.get('pdf_generated', False):
-            st.download_button(
-                label="⬇️ Télécharger le Rapport PDF",
-                data=st.session_state['pdf_buffer'],
-                file_name="rapport_parallelo_vitrage.pdf",
-                mime="application/pdf",
-                use_container_width=True,
-                key="download_pdf_button"
-            )
-            st.info(f"📋 Le rapport contient {len(df_affichage) + 1} pages")
+        # -------------------- Affichage du tableau --------------------
+        st.markdown("### 📊 Tableau des Résultats")
+        datas = Gauchissement_vitrage(uploaded_file)
+        df_affichage = pd.DataFrame(datas).round(1)
 
-else:
-    st.info("📥 Importez un fichier Excel pour commencer l’analyse.")
-        # Footer
-st.caption("Application développée avec Streamlit et Shapely")
+        # Fonction pour colorer la colonne Gauchissement
+        def color_gauchissement(colonne):
+            styles = []
+            for i in range(len(colonne)):
+                if df_affichage.loc[i, 'Gauchissement (mm)'] < df_affichage.loc[i, 'Critère (mm)*']:
+                    styles.append("color: green;text-align: center; font-size: 18px;")
+                else:
+                    styles.append("color: red;text-align: center; font-size: 18px")
+            return styles
 
+        # Fonction pour griser la colonne Critère
+        def gray_critere(colonne):
+            return ["color: gray;" for _ in colonne]
 
+        # Application des styles
+        styled_df = (
+            df_affichage.style
+            .apply(color_gauchissement, subset=['Gauchissement (mm)'])
+            .apply(gray_critere, subset=['Critère (mm)*'])
+            .format({
+                'Gauchissement (mm)': "{:.1f}",
+                'Critère (mm)*': "{:.1f}"
+            })
+            .set_properties(**{"text-align": "center", "font-size": "18px"})
+        )
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        st.dataframe(styled_df, width='stretch', hide_index=True)
+        st.info("""\* Critère admissible suivant le tableau 11 du cahier du CSTB 3574v2 : LPetit Côté/75""")
