@@ -1017,7 +1017,7 @@ st.markdown("""
 tab1, tab2 = st.tabs(["  Analyse de la mise en parallélogramme  ", "  Analyse du gauchissement  "])
 
 with tab1:
-     st.markdown("### 📏 Défitinion des jeux et tolérances")
+    st.markdown("### 📏 Défitinion des jeux et tolérances")
     choix = st.selectbox("Calage latéral :", ["Sans", "Avec"])
 
     # --- Ligne 1 ---
@@ -1280,6 +1280,7 @@ with tab2:
 
         st.dataframe(styled_df, width='stretch', hide_index=True)
         st.info("""\* Critère admissible suivant le tableau 11 du cahier du CSTB 3574v2 : LPetit Côté/75""")
+
 
 
 
