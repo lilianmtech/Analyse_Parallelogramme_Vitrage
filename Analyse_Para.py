@@ -1,4 +1,3 @@
-
 import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -388,7 +387,6 @@ def CoordPoint(doc,feuille):
         deplacement = [X_Depl,Y_Depl,Z_Depl]
         Depl[labels[i]] = deplacement
         i = 1+i
-        
     return Coord, Depl
 
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
@@ -471,7 +469,6 @@ def Dechaussement_vitrage(uploaded_file, option_calage, Raico):
 
         H =sqrt((cadre_0['A'][0] - cadre_0['D'][0])**2 + (cadre_0['A'][1] - cadre_0['D'][1])**2)
         L = sqrt((cadre_0['A'][0] - cadre_0['B'][0])**2 + (cadre_0['A'][1] - cadre_0['B'][1])**2)
-        Crit = builtins.min(H,L)/75
         pf = L/1000 + H/1000
         V = Vitrage(cadre_0,cadre_def,Gamme,pf,raico=Raico,calage_lateral=option_calage)
         data, graph = V.Dechaussement()
@@ -498,7 +495,10 @@ def Gauchissement_vitrage(uploaded_file):
     datas = {
         'ID vitrage': [],
         'Gauchissement (mm)': [],
-        'Critère (mm)*': [],
+        'L (mm)' : [],
+        'Diag (mm)' : [],
+        'Critère cahier 3574v2 (mm)*': [],
+        'Critère DTU39-P4 (mm)**': [],
     }
 
     for row in range(3, max_row+1) :
@@ -550,14 +550,18 @@ def Gauchissement_vitrage(uploaded_file):
 
         H = sqrt((cadre_0['A'][0] - cadre_0['D'][0])**2 + (cadre_0['A'][1] - cadre_0['D'][1])**2)
         L = sqrt((cadre_0['A'][0] - cadre_0['B'][0])**2 + (cadre_0['A'][1] - cadre_0['B'][1])**2)
-        Crit = builtins.min(H,L)/75
+        diag1 = sqrt((cadre_0['A'][0] - cadre_0['C'][0])**2 + (cadre_0['A'][1] - cadre_0['C'][1])**2)
+        diag2 = sqrt((cadre_0['B'][0] - cadre_0['D'][0])**2 + (cadre_0['B'][1] - cadre_0['D'][1])**2)
         pf = L/1000 + H/1000
         V = Vitrage(cadre_0,cadre_def,Gamme,pf)
         data = V.DiffHorsPlan()
 
         datas['ID vitrage'].append(str(labels["A"])+' / '+str(labels["B"])+' / '+str(labels["C"])+' / '+str(labels["D"]))
         datas['Gauchissement (mm)'].append(data)
-        datas['Critère (mm)*'].append(Crit)  
+        datas['L (mm)'].append(builtins.min(H,L))
+        datas['Diag (mm)'].append(builtins.min(diag1,diag2))
+        datas['Critère cahier 3574v2 (mm)*'].append(builtins.min(H,L)/75)
+        datas['Critère DTU39-P4 (mm)**'].append(builtins.min(diag1,diag2)/150) 
     return datas
 
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -1256,7 +1260,7 @@ with tab2:
         def color_gauchissement(colonne):
             styles = []
             for i in range(len(colonne)):
-                if df_affichage.loc[i, 'Gauchissement (mm)'] < df_affichage.loc[i, 'Critère (mm)*']:
+                if df_affichage.loc[i, 'Gauchissement (mm)'] < df_affichage.loc[i, 'Critère cahier 3574v2 (mm)*'] and df_affichage.loc[i, 'Gauchissement (mm)'] < df_affichage.loc[i, 'Critère DTU39-P4 (mm)**']:
                     styles.append("color: green;text-align: center; font-size: 18px;")
                 else:
                     styles.append("color: red;text-align: center; font-size: 18px")
@@ -1270,21 +1274,17 @@ with tab2:
         styled_df = (
             df_affichage.style
             .apply(color_gauchissement, subset=['Gauchissement (mm)'])
-            .apply(gray_critere, subset=['Critère (mm)*'])
+            .apply(gray_critere, subset=['L (mm)','Diag (mm)','Critère cahier 3574v2 (mm)*','Critère DTU39-P4 (mm)**'])
             .format({
                 'Gauchissement (mm)': "{:.1f}",
-                'Critère (mm)*': "{:.1f}"
+                'L (mm)': "{:.1f}",
+                'Diag (mm)': "{:.1f}",
+                'Critère cahier 3574v2 (mm)*': "{:.1f}",
+                'Critère DTU39-P4 (mm)**': "{:.1f}"
             })
             .set_properties(**{"text-align": "center", "font-size": "18px"})
         )
-
         st.dataframe(styled_df, width='stretch', hide_index=True)
         st.info("""\* Critère admissible suivant le tableau 11 du cahier du CSTB 3574v2 : LPetit Côté/75""")
-
-
-
-
-
-
-
-
+        st.info("""\** Critère admissible suivant le §9.2 du DTU39-P4 : Diag/150""")
+        st.info("""❕ Critère valable pour vitrages isolants""")
