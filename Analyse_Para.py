@@ -438,30 +438,30 @@ def Dechaussement_vitrage(uploaded_file, option_calage, Raico):
         cadre_0 = {}
         
         for key, label in labels.items():
-            x = Coord[label][0] + Depl[label][0] - (Coord[labels["D"]][0] + Depl[labels["D"]][0])
+            x = abs(Coord[label][0] - Coord[labels["D"]][0]) + (Depl[label][0] - Depl[labels["D"]][0])
             if key == "D":  # cas particulier pour D
                 x = 0
 
             if key == "A":
-                y = Coord[label][1] - Depl[labels["D"]][1] - (Coord[labels["D"]][1] - Depl[labels["D"]][1])
+                y = abs(Coord[label][1] - Coord[labels["D"]][1])
             elif key == "B":
-                y = Coord[label][1] - Depl[labels["C"]][1] - (Coord[labels["D"]][1] - Depl[labels["D"]][1])
+                y = abs(Coord[label][1] - Coord[labels["D"]][1]) + (Depl[labels["C"]][1] - Depl[labels["D"]][1])
             elif key == "C":
-                y = Coord[label][1] - Depl[labels["C"]][1] - (Coord[labels["D"]][1] - Depl[labels["D"]][1])
-            else:  # D
-                y = Coord[label][1] - Depl[label][1] - (Coord[labels["D"]][1] - Depl[labels["D"]][1])
+                y = abs(Coord[label][1] - Coord[labels["D"]][1]) + (Depl[labels["C"]][1] - Depl[labels["D"]][1])
+            elif key == "D":
+                y = 0
 
-            z = Coord[label][2] + Depl[label][2]
+            z = (Coord[label][2] - Coord[labels["D"]][2]) + (Depl[label][2] - Depl[labels["D"]][2])
 
             cadre_def[key] = [x, y, z]
 
-            x_0 = Coord[label][0] - Coord[labels["D"]][0]
-            y_0 = Coord[label][1] - Coord[labels["D"]][1]
-            z_0 = Coord[label][2]
+            x_0 = abs (Coord[label][0] - Coord[labels["D"]][0])
+            y_0 = abs (Coord[label][1] - Coord[labels["D"]][1])
+            z_0 = Coord[label][2] - Coord[labels["D"]][2]
 
             cadre_0[key] = [x_0, y_0, z_0]
         
-        angle = degrees(arctan(cadre_0['A'][2]/cadre_0['A'][1]))
+        angle = abs(degrees(arctan(cadre_0['A'][2]/cadre_0['A'][1])))
 
         for key, coords in cadre_def.items():
              cadre_def[key] = rot_repere(angle,coords)
@@ -517,30 +517,30 @@ def Gauchissement_vitrage(uploaded_file):
         cadre_0 = {}
         
         for key, label in labels.items():
-            x = Coord[label][0] + Depl[label][0] - (Coord[labels["D"]][0] + Depl[labels["D"]][0])
+            x = abs(Coord[label][0] - Coord[labels["D"]][0]) + (Depl[label][0] - Depl[labels["D"]][0])
             if key == "D":  # cas particulier pour D
                 x = 0
 
             if key == "A":
-                y = Coord[label][1] - Depl[labels["D"]][1] - (Coord[labels["D"]][1] - Depl[labels["D"]][1])
+                y = abs(Coord[label][1] - Coord[labels["D"]][1])
             elif key == "B":
-                y = Coord[label][1] - Depl[labels["C"]][1] - (Coord[labels["D"]][1] - Depl[labels["D"]][1])
+                y = abs(Coord[label][1] - Coord[labels["D"]][1]) + (Depl[labels["C"]][1] - Depl[labels["D"]][1])
             elif key == "C":
-                y = Coord[label][1] - Depl[labels["C"]][1] - (Coord[labels["D"]][1] - Depl[labels["D"]][1])
-            else:  # D
-                y = Coord[label][1] - Depl[label][1] - (Coord[labels["D"]][1] - Depl[labels["D"]][1])
+                y = abs(Coord[label][1] - Coord[labels["D"]][1]) + (Depl[labels["C"]][1] - Depl[labels["D"]][1])
+            elif key == "D":
+                y = 0
 
-            z = Coord[label][2] + Depl[label][2]
+            z = (Coord[label][2] - Coord[labels["D"]][2]) + (Depl[label][2] - Depl[labels["D"]][2])
 
             cadre_def[key] = [x, y, z]
 
-            x_0 = Coord[label][0] - Coord[labels["D"]][0]
-            y_0 = Coord[label][1] - Coord[labels["D"]][1]
-            z_0 = Coord[label][2]
+            x_0 = abs (Coord[label][0] - Coord[labels["D"]][0])
+            y_0 = abs (Coord[label][1] - Coord[labels["D"]][1])
+            z_0 = Coord[label][2] - Coord[labels["D"]][2]
 
             cadre_0[key] = [x_0, y_0, z_0]
         
-        angle = degrees(arctan(cadre_0['A'][2]/cadre_0['A'][1]))
+        angle = abs(degrees(arctan(cadre_0['A'][2]/cadre_0['A'][1])))
 
         for key, coords in cadre_def.items():
              cadre_def[key] = rot_repere(angle,coords)
@@ -1280,6 +1280,7 @@ with tab2:
 
         st.dataframe(styled_df, width='stretch', hide_index=True)
         st.info("""\* Critère admissible suivant le tableau 11 du cahier du CSTB 3574v2 : LPetit Côté/75""")
+
 
 
 
