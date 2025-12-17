@@ -16,6 +16,7 @@ import requests
 from PyPDF2 import PdfReader, PdfWriter
 from reportlab.pdfgen import canvas
 from reportlab.lib.utils import ImageReader
+import hashlib
 
 class Vitrage:
     def __init__(self,cadre_0,cadre_def,Gamme,pf,raico = None,calage_lateral='Sans'):
@@ -1323,9 +1324,17 @@ with tab1:
 with tab2:
     if uploaded_file:
         # Mémoriser le nom du fichier pour savoir si un nouveau fichier est importé
-        if "uploaded_name" not in st.session_state or st.session_state["uploaded_name"] != uploaded_file.name:
-            st.session_state.clear()
-            st.session_state["uploaded_name"] = uploaded_file.name
+        file_bytes = uploaded_file.getvalue()
+        file_hash = hashlib.md5(file_bytes).hexdigest()
+
+        # Vérifier si le fichier est nouveau ou modifié
+        if "uploaded_hash" not in st.session_state or st.session_state["uploaded_hash"] != file_hash:
+            # Lire le fichier Excel
+            df = pd.read_excel(uploaded_file)
+
+        # Mettre à jour la session
+        st.session_state.clear()
+        st.session_state["uploaded_name"] = uploaded_file.name
 
         # -------------------- Affichage du tableau --------------------
         st.markdown("### 📊 Tableau des Résultats")
@@ -1364,3 +1373,4 @@ with tab2:
         st.info("""\* Critère admissible suivant le tableau 11 du cahier du CSTB 3574v2 : LPetit Côté/75""")
         st.info("""\** Critère admissible suivant le §9.2 du DTU39-P4 : Diag/150""")
         st.info("""❕ Critère valable pour vitrages isolants""")
+
