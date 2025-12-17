@@ -5,3 +5,4 @@ sympy
 scipy
 matplotlib
 PyPDF2
+hashlib
