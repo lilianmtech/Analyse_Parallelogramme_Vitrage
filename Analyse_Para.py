@@ -393,10 +393,40 @@ def CoordPoint(doc,feuille):
 
 #-------------------------------changement de repére--------------------------
 
-def rot_repere(angle,point):
-    y = cos(radians(-angle))*point[1]-sin(radians(-angle))*point[2]
-    z = sin(radians(-angle))*point[1]+cos(radians(-angle))*point[2]
-    return[point[0], y, z]
+def local_coordinates(A, B, C, D, P):
+    """
+    Calcule les coordonnées locales du point P
+    dans le repère défini en D avec :
+      - axe x colinéaire à DC
+      - axe y colinéaire à DA
+      - axe z = produit vectoriel (x,y)
+    
+    Paramètres :
+        A, B, C, D, P : tuples (x,y,z)
+    
+    Retour :
+        Coordonnées locales de P (px, py, pz)
+    """
+    # Conversion en vecteurs numpy
+    A, B, C, D, P = map(array, (A, B, C, D, P))
+    
+    # Vecteurs de base du repère local
+    x_axis = C - D
+    y_axis = A - D
+    z_axis = cross(x_axis, y_axis)
+    
+    # Normalisation des axes
+    x_axis = x_axis / linalg.norm(x_axis)
+    y_axis = y_axis / linalg.norm(y_axis)
+    z_axis = z_axis / linalg.norm(z_axis)
+    
+    # Matrice de passage (base locale)
+    R = vstack([x_axis, y_axis, z_axis]).T
+    
+    # Coordonnées locales du point P
+    local_coords = R.T @ (P - D)
+    
+    return local_coords.tolist()
 
 #---------------------------Chargement des vitrages---------------------------"
 def Dechaussement_vitrage(uploaded_file, option_calage, Raico):
@@ -432,40 +462,63 @@ def Dechaussement_vitrage(uploaded_file, option_calage, Raico):
         }
         Gamme = sheet.cell(row + 1, column=6).value        
         
-        cadre_def = {}
         cadre_0 = {}
+        cadre_def = {}
         
-        for key, label in labels.items():
-            x = abs(Coord[label][0] - Coord[labels["D"]][0]) + (Depl[label][0] - Depl[labels["D"]][0])
-            if key == "D":  # cas particulier pour D
-                x = 0
 
-            if key == "A":
-                y = abs(Coord[label][1] - Coord[labels["D"]][1])
-            elif key == "B":
-                y = abs(Coord[label][1] - Coord[labels["D"]][1]) + (Depl[labels["C"]][1] - Depl[labels["D"]][1])
-            elif key == "C":
-                y = abs(Coord[label][1] - Coord[labels["D"]][1]) + (Depl[labels["C"]][1] - Depl[labels["D"]][1])
-            elif key == "D":
-                y = 0
+        if Coord[labels["A"]][2] != 0 or Coord[labels["B"]][2] != 0 or Coord[labels["C"]][2] != 0 or Coord[labels["D"]][2] != 0 :
+            Depl_rep = {}
+            for  key, label in labels.items():
+                cadre_0[key] = local_coordinates(Coord[labels["A"]], Coord[labels["B"]], Coord[labels["C"]], Coord[labels["D"]], Coord[label])
 
-            z = (Coord[label][2] - Coord[labels["D"]][2]) + (Depl[label][2] - Depl[labels["D"]][2])
+            for  key, label in labels.items():
+                x = Depl[label][0] + Coord[labels["D"]][0]
+                y = Depl[label][1] + Coord[labels["D"]][1]
+                z = Depl[label][2] + Coord[labels["D"]][2]
+                Depl_rep[key] = local_coordinates(Coord[labels["A"]], Coord[labels["B"]], Coord[labels["C"]], Coord[labels["D"]], [x,y,z])
 
-            cadre_def[key] = [x, y, z]
+            for key, label in labels.items():
+                x = cadre_0[key][0] + (Depl_rep[key][0] - Depl_rep["D"][0])
+                if key == "D":  # cas particulier pour D
+                    x = 0
 
-            x_0 = abs (Coord[label][0] - Coord[labels["D"]][0])
-            y_0 = abs (Coord[label][1] - Coord[labels["D"]][1])
-            z_0 = Coord[label][2] - Coord[labels["D"]][2]
+                if key == "A":
+                    y = cadre_0[key][1]
+                elif key == "B":
+                    y = cadre_0[key][1] + (Depl_rep["C"][1] - Depl_rep["D"][1])
+                elif key == "C":
+                    y = cadre_0[key][1] + (Depl_rep["C"][1] - Depl_rep["D"][1])
+                elif key == "D":
+                    y = 0
 
-            cadre_0[key] = [x_0, y_0, z_0]
+                z = cadre_0[key][2] + (Depl_rep[key][2] - Depl_rep["D"][2])
+
+                cadre_def[key] = [x, y, z]
         
-        angle = abs(degrees(arctan(cadre_0['A'][2]/cadre_0['A'][1])))
+        else :
+            for key, label in labels.items():
+                x = abs(Coord[label][0] - Coord[labels["D"]][0]) + (Depl[label][0] - Depl[labels["D"]][0])
+                if key == "D":  # cas particulier pour D
+                    x = 0
 
-        for key, coords in cadre_def.items():
-             cadre_def[key] = rot_repere(angle,coords)
+                if key == "A":
+                    y = abs(Coord[label][1] - Coord[labels["D"]][1])
+                elif key == "B":
+                    y = abs(Coord[label][1] - Coord[labels["D"]][1]) + (Depl[labels["C"]][1] - Depl[labels["D"]][1])
+                elif key == "C":
+                    y = abs(Coord[label][1] - Coord[labels["D"]][1]) + (Depl[labels["C"]][1] - Depl[labels["D"]][1])
+                elif key == "D":
+                    y = 0
 
-        for key, coords in cadre_0.items():
-             cadre_0[key] = rot_repere(angle,coords)
+                z = (Coord[label][2] - Coord[labels["D"]][2]) + (Depl[label][2] - Depl[labels["D"]][2])
+
+                cadre_def[key] = [x, y, z]
+
+                x_0 = abs (Coord[label][0] - Coord[labels["D"]][0])
+                y_0 = abs (Coord[label][1] - Coord[labels["D"]][1])
+                z_0 = Coord[label][2] - Coord[labels["D"]][2]
+
+                cadre_0[key] = [x_0, y_0, z_0]
 
         H =sqrt((cadre_0['A'][0] - cadre_0['D'][0])**2 + (cadre_0['A'][1] - cadre_0['D'][1])**2)
         L = sqrt((cadre_0['A'][0] - cadre_0['B'][0])**2 + (cadre_0['A'][1] - cadre_0['B'][1])**2)
@@ -513,40 +566,63 @@ def Gauchissement_vitrage(uploaded_file):
         }
         Gamme = sheet.cell(row + 1, column=6).value        
         
-        cadre_def = {}
         cadre_0 = {}
+        cadre_def = {}
         
-        for key, label in labels.items():
-            x = abs(Coord[label][0] - Coord[labels["D"]][0]) + (Depl[label][0] - Depl[labels["D"]][0])
-            if key == "D":  # cas particulier pour D
-                x = 0
 
-            if key == "A":
-                y = abs(Coord[label][1] - Coord[labels["D"]][1])
-            elif key == "B":
-                y = abs(Coord[label][1] - Coord[labels["D"]][1]) + (Depl[labels["C"]][1] - Depl[labels["D"]][1])
-            elif key == "C":
-                y = abs(Coord[label][1] - Coord[labels["D"]][1]) + (Depl[labels["C"]][1] - Depl[labels["D"]][1])
-            elif key == "D":
-                y = 0
+        if Coord[labels["A"]][2] != 0 or Coord[labels["B"]][2] != 0 or Coord[labels["C"]][2] != 0 or Coord[labels["D"]][2] != 0 :
+            Depl_rep = {}
+            for  key, label in labels.items():
+                cadre_0[key] = local_coordinates(Coord[labels["A"]], Coord[labels["B"]], Coord[labels["C"]], Coord[labels["D"]], Coord[label])
 
-            z = (Coord[label][2] - Coord[labels["D"]][2]) + (Depl[label][2] - Depl[labels["D"]][2])
+            for  key, label in labels.items():
+                x = Depl[label][0] + Coord[labels["D"]][0]
+                y = Depl[label][1] + Coord[labels["D"]][1]
+                z = Depl[label][2] + Coord[labels["D"]][2]
+                Depl_rep[key] = local_coordinates(Coord[labels["A"]], Coord[labels["B"]], Coord[labels["C"]], Coord[labels["D"]], [x,y,z])
 
-            cadre_def[key] = [x, y, z]
+            for key, label in labels.items():
+                x = cadre_0[key][0] + (Depl_rep[key][0] - Depl_rep["D"][0])
+                if key == "D":  # cas particulier pour D
+                    x = 0
 
-            x_0 = abs (Coord[label][0] - Coord[labels["D"]][0])
-            y_0 = abs (Coord[label][1] - Coord[labels["D"]][1])
-            z_0 = Coord[label][2] - Coord[labels["D"]][2]
+                if key == "A":
+                    y = cadre_0[key][1]
+                elif key == "B":
+                    y = cadre_0[key][1] + (Depl_rep["C"][1] - Depl_rep["D"][1])
+                elif key == "C":
+                    y = cadre_0[key][1] + (Depl_rep["C"][1] - Depl_rep["D"][1])
+                elif key == "D":
+                    y = 0
 
-            cadre_0[key] = [x_0, y_0, z_0]
+                z = cadre_0[key][2] + (Depl_rep[key][2] - Depl_rep["D"][2])
+
+                cadre_def[key] = [x, y, z]
         
-        angle = abs(degrees(arctan(cadre_0['A'][2]/cadre_0['A'][1])))
+        else :
+            for key, label in labels.items():
+                x = abs(Coord[label][0] - Coord[labels["D"]][0]) + (Depl[label][0] - Depl[labels["D"]][0])
+                if key == "D":  # cas particulier pour D
+                    x = 0
 
-        for key, coords in cadre_def.items():
-             cadre_def[key] = rot_repere(angle,coords)
+                if key == "A":
+                    y = abs(Coord[label][1] - Coord[labels["D"]][1])
+                elif key == "B":
+                    y = abs(Coord[label][1] - Coord[labels["D"]][1]) + (Depl[labels["C"]][1] - Depl[labels["D"]][1])
+                elif key == "C":
+                    y = abs(Coord[label][1] - Coord[labels["D"]][1]) + (Depl[labels["C"]][1] - Depl[labels["D"]][1])
+                elif key == "D":
+                    y = 0
 
-        for key, coords in cadre_0.items():
-             cadre_0[key] = rot_repere(angle,coords)
+                z = (Coord[label][2] - Coord[labels["D"]][2]) + (Depl[label][2] - Depl[labels["D"]][2])
+
+                cadre_def[key] = [x, y, z]
+
+                x_0 = abs (Coord[label][0] - Coord[labels["D"]][0])
+                y_0 = abs (Coord[label][1] - Coord[labels["D"]][1])
+                z_0 = Coord[label][2] - Coord[labels["D"]][2]
+
+                cadre_0[key] = [x_0, y_0, z_0]
 
         H = sqrt((cadre_0['A'][0] - cadre_0['D'][0])**2 + (cadre_0['A'][1] - cadre_0['D'][1])**2)
         L = sqrt((cadre_0['A'][0] - cadre_0['B'][0])**2 + (cadre_0['A'][1] - cadre_0['B'][1])**2)
