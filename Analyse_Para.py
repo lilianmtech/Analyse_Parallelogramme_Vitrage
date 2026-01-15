@@ -31,7 +31,7 @@ class Vitrage:
         self.D0 = cadre_0['D']
 
         self.calage_lateral = calage_lateral
-        self.p = pf
+        self.pf = pf
         self.raico = raico
 
         self.cale_bas = 100
@@ -186,23 +186,16 @@ class Vitrage:
         l = ('Pos_vit_lat','Pos_vit_haut','Tolerance epine','Tolerance traverse','Calage lateral')
         Raico={}
         
-        if self.p > 7.0 :
-            pf = 12.0
-        elif  5.0 < self.p <= 7.0 :
-            pf = 9.0
-        elif self.p <= 5.0 :
-            pf = 6.0
-        
         if self.calage_lateral == 'Sans':
             Tm1 = self.raico[0]
             Tm2 = self.raico[1]
             Tt1 = self.raico[2]
             Tt2 = self.raico[3]
 
-            pos_vit_lat = (self.Gamme/2-(Tm1+pf+Tm2))/2+Tm2
-            pos_vit_haut = (self.Gamme/2-(Tt1+pf+Tt2))/2+Tt2
-            jeu_borne_lat = (self.Gamme/2-(Tm1+pf+Tm2))/2
-            jeu_borne_haut = (self.Gamme/2-(Tt1+pf+Tt2))/2
+            pos_vit_lat = (self.Gamme/2-(Tm1+self.pf+Tm2))/2+Tm2
+            pos_vit_haut = (self.Gamme/2-(Tt1+self.pf+Tt2))/2+Tt2
+            jeu_borne_lat = (self.Gamme/2-(Tm1+self.pf+Tm2))/2
+            jeu_borne_haut = (self.Gamme/2-(Tt1+self.pf+Tt2))/2
 
             donnees = (pos_vit_lat, pos_vit_haut, jeu_borne_lat, jeu_borne_haut, 0)
 
@@ -215,9 +208,9 @@ class Vitrage:
             Jv = self.raico[5]
         
             pos_vit_lat = Ca+Jc
-            pos_vit_haut = self.Gamme/2-(Tt2+pf+Tt1+Jv)+Tt2
-            jeu_borne_lat = self.Gamme/2 - (Ca+Jc+pf+Tm)
-            jeu_borne_haut = self.Gamme/2-(Tt1+pf+Tt2+Jv)
+            pos_vit_haut = self.Gamme/2-(Tt2+self.pf+Tt1+Jv)+Tt2
+            jeu_borne_lat = self.Gamme/2 - (Ca+Jc+self.pf+Tm)
+            jeu_borne_haut = self.Gamme/2-(Tt1+self.pf+Tt2+Jv)
 
             donnees = (pos_vit_lat, pos_vit_haut, jeu_borne_lat, jeu_borne_haut, Ca)
 
@@ -430,7 +423,7 @@ def local_coordinates(A, B, C, D, P):
     return local_coords.tolist()
 
 #---------------------------Chargement des vitrages---------------------------"
-def Dechaussement_vitrage(uploaded_file, option_calage, Raico):
+def Dechaussement_vitrage(uploaded_file, option_calage, Raico, Typo):
     Feuille_coord = 'Coord_Points'
     Coord,Depl = CoordPoint(uploaded_file,Feuille_coord)
     
@@ -441,6 +434,7 @@ def Dechaussement_vitrage(uploaded_file, option_calage, Raico):
         'ID vitrage': [],
         'Gamme': [],
         'Demi-périmètre (m)': [],
+        'Pf (mm)': [],
         'Ecart minimal // bornes gauche (mm)': [],
         'Ecart minimal // bornes droite (mm)': [],
         'Ecart minimal // bornes hautes (mm)': []
@@ -520,16 +514,29 @@ def Dechaussement_vitrage(uploaded_file, option_calage, Raico):
                 z_0 = Coord[label][2] - Coord[labels["D"]][2]
 
                 cadre_0[key] = [x_0, y_0, z_0]
-
+        
         H =sqrt((cadre_0['A'][0] - cadre_0['D'][0])**2 + (cadre_0['A'][1] - cadre_0['D'][1])**2)
         L = sqrt((cadre_0['A'][0] - cadre_0['B'][0])**2 + (cadre_0['A'][1] - cadre_0['B'][1])**2)
-        pf = L/1000 + H/1000
+        demiperi = L/1000 + H/1000
+        if Typo == 'Façade':
+            if demiperi > 7.0 :
+                pf = 12.0
+            elif  5.0 < demiperi <= 7.0 :
+                pf = 9.0
+            elif demiperi <= 5.0 :
+                pf = 6.0
+        elif Typo == 'Verrière':
+            if H <= 1000 or L <= 1000 :
+                pf = 8.0
+            else :
+                pf = 10.0
         V = Vitrage(cadre_0,cadre_def,Gamme,pf,raico=Raico,calage_lateral=option_calage)
         data, graph = V.Dechaussement()
 
         datas['ID vitrage'].append(str(labels["A"])+' / '+str(labels["B"])+' / '+str(labels["C"])+' / '+str(labels["D"]))
         datas['Gamme'].append(Gamme)
-        datas['Demi-périmètre (m)'].append(round(pf,1))
+        datas['Demi-périmètre (m)'].append(round(demiperi,1))
+        datas['Pf (mm)'].append(round(pf,1))
         datas['Ecart minimal // bornes gauche (mm)'].append(data[0])
         datas['Ecart minimal // bornes droite (mm)'].append(data[1])
         datas['Ecart minimal // bornes hautes (mm)'].append(data[2])
@@ -1099,6 +1106,7 @@ tab1, tab2 = st.tabs(["  Analyse de la mise en parallélogramme  ", "  Analyse d
 
 with tab1:
     st.markdown("### 📏 Défitinion des jeux et tolérances")
+    Typo = st.selectbox("Typologie :", ["Façade", "Verrière"])
     choix = st.selectbox("Calage latéral :", ["Sans", "Avec"])
 
     # --- Ligne 1 ---
@@ -1154,6 +1162,7 @@ with tab1:
 
         # Vérifier si un changement de paramètre nécessite une mise à jour
         params_actuels = {
+            "Typo": Typo,
             "choix": choix,
             "Raico": Raico,
         }
@@ -1162,7 +1171,7 @@ with tab1:
             "params_prec" not in st.session_state
             or st.session_state["params_prec"] != params_actuels
         ):
-            datas, graphs = Dechaussement_vitrage(uploaded_file, choix, Raico)
+            datas, graphs = Dechaussement_vitrage(uploaded_file, choix, Raico, Typo)
             st.session_state["datas"] = datas
             st.session_state["graphs"] = graphs
             st.session_state["params_prec"] = params_actuels
@@ -1205,8 +1214,9 @@ with tab1:
             idx = datas["ID vitrage"].index(ligne_selectionnee)
             ligne_data = {col: datas[col][idx] for col in datas.keys()}
 
+
             for col in ligne_data.keys():
-                    if col != 'ID vitrage':
+                    if col != 'ID vitrage' and col != 'Gamme' and col != 'Pf (mm)' and col != 'Demi-périmètre (m)':
                         st.metric(col, ligne_data[col])
                         st.markdown(
                             """
@@ -1373,4 +1383,5 @@ with tab2:
         st.info("""\* Critère admissible suivant le tableau 11 du cahier du CSTB 3574v2 : LPetit Côté/75""")
         st.info("""\** Critère admissible suivant le §9.2 du DTU39-P4 : Diag/150""")
         st.info("""❕ Critère valable pour vitrages isolants""")
+
 
