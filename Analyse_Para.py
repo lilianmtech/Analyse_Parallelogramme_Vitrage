@@ -1130,20 +1130,20 @@ with tab1:
 
     with ligne2_col1:
         if choix == "Sans":
-            Tm1 = st.number_input("Valeur Tolérance Tm1 :", value=2.5, step=0.1, format="%.2f")
-            Tm2 = st.number_input("Valeur Tolérance Tm2 + menuiserie :", value=10.5, step=0.1, format="%.2f")
+            Tm1 = st.number_input("Valeur Tolérance Tm1 :", value=1.8, step=0.1, format="%.2f")
+            Tm2 = st.number_input("Valeur Tolérance Tm2 + menuiserie :", value=9.8, step=0.1, format="%.2f")
         else:
-            Tm =  st.number_input("Valeur Tolérance Tm :", value=2.5, step=0.1, format="%.2f")
-            Ca =  st.number_input("Epaisseur cale C + menuiserie :", value=13.0, step=0.1, format="%.2f")
-            Jc =  st.number_input("Jeu entre vitrage et cale Jc :", value=2.0, step=0.1, format="%.2f")
+            Tm =  st.number_input("Valeur Tolérance Tm :", value=1.8, step=0.1, format="%.2f")
+            Ca =  st.number_input("Epaisseur cale C + menuiserie :", value=9.8, step=0.1, format="%.2f")
+            Jc =  st.number_input("Jeu entre vitrage et cale Jc :", value=8.2, step=0.1, format="%.2f")
         
     with ligne2_col2:
         if choix == "Sans":
-            Tt1 = st.number_input("Valeur Tolérance Tt1 :", value=5.0, step=0.1, format="%.2f")
-            Tt2 = st.number_input("Valeur Tolérance Tt2 + menuiserie :", value=13.0, step=0.1, format="%.2f")
+            Tt1 = st.number_input("Valeur Tolérance Tt1 :", value=3.6, step=0.1, format="%.2f")
+            Tt2 = st.number_input("Valeur Tolérance Tt2 + menuiserie :", value=11.6, step=0.1, format="%.2f")
         else:
-            Tt1 =  st.number_input("Valeur Tolérance Tt1 :", value=5.0, step=0.1, format="%.2f")
-            Tt2 =  st.number_input("Valeur Tolérance Tt2 + menuiserie :", value=13.0, step=0.1, format="%.2f")
+            Tt1 =  st.number_input("Valeur Tolérance Tt1 :", value=3.6, step=0.1, format="%.2f")
+            Tt2 =  st.number_input("Valeur Tolérance Tt2 + menuiserie :", value=11.6, step=0.1, format="%.2f")
             Jv =  st.number_input("Jeu entre borne basse et vitrage Jv :", value=1.0, step=0.1, format="%.2f")
 
     #---------------------------Chargement des vitrages---------------------------
@@ -1383,6 +1383,7 @@ with tab2:
         st.info("""\* Critère admissible suivant le tableau 11 du cahier du CSTB 3574v2 : LPetit Côté/75""")
         st.info("""\** Critère admissible suivant le §9.2 du DTU39-P4 : Diag/150""")
         st.info("""❕ Critère valable pour vitrages isolants""")
+
 
 
 
