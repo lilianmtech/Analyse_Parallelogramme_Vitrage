@@ -35,7 +35,7 @@ class Vitrage:
         self.raico = raico
 
         self.cale_bas = 100
-        self.cale_laterale = 20
+        self.cale_laterale = 50
 
     def distance_point_plan(self, P1, P2, P3, Ptest):
             #Vecteur normal
@@ -1383,6 +1383,7 @@ with tab2:
         st.info("""\* Critère admissible suivant le tableau 11 du cahier du CSTB 3574v2 : LPetit Côté/75""")
         st.info("""\** Critère admissible suivant le §9.2 du DTU39-P4 : Diag/150""")
         st.info("""❕ Critère valable pour vitrages isolants""")
+
 
 
 
