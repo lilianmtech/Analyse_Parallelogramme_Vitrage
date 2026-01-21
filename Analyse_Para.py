@@ -747,7 +747,7 @@ def creer_page_complete(ligne_data, quadrilateres):
     metrics_data = [
         ['Paramètre', 'Valeur', 'Unité'],
         ['Gamme', f"{ligne_data['Gamme']}", '-'],
-        ['Demi-périmètre', f"{ligne_data['Demi-périmètre (m)']:.1f}", 'm'],
+        ['Pf mini', f"{ligne_data['Pf (mm)']:.1f}", 'mm'],
         ['Ecart minimal // bornes gauche', f"{ligne_data['Ecart minimal // bornes gauche (mm)']:.1f}", 'mm'],
         ['Ecart minimal // bornes droite', f"{ligne_data['Ecart minimal // bornes droite (mm)']:.1f}", 'mm'],
         ['Ecart minimal // bornes hautes', f"{ligne_data['Ecart minimal // bornes hautes (mm)']:.1f}", 'mm']
@@ -1383,6 +1383,7 @@ with tab2:
         st.info("""\* Critère admissible suivant le tableau 11 du cahier du CSTB 3574v2 : LPetit Côté/75""")
         st.info("""\** Critère admissible suivant le §9.2 du DTU39-P4 : Diag/150""")
         st.info("""❕ Critère valable pour vitrages isolants""")
+
 
 
 
