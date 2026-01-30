@@ -1060,8 +1060,9 @@ st.sidebar.image(url+"logo-couleur.png?raw=true",width=200)
   # Section d'import de fichier Excel (commune aux deux onglets)
 st.sidebar.header("📁 Import de données")
 uploaded_file = st.sidebar.file_uploader("Importer un fichier de données (CSV ou Excel)", type=["csv", "xlsx"])
-nom_fichier = uploaded_file.name 
-nom_sans_extension = nom_fichier.rsplit('.', 1)[0]
+if uploaded_file is not None:
+    nom_fichier = uploaded_file.name 
+    nom_sans_extension = nom_fichier.rsplit('.', 1)[0]
 
 # Titre de l'application
 st.markdown(
@@ -1384,6 +1385,7 @@ with tab2:
         st.info("""\* Critère admissible suivant le tableau 11 du cahier du CSTB 3574v2 : LPetit Côté/75""")
         st.info("""\** Critère admissible suivant le §9.2 du DTU39-P4 : Diag/150""")
         st.info("""❕ Critère valable pour vitrages isolants""")
+
 
 
 
